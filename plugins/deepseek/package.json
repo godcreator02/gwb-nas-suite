@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-deepseek",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {"name": "godcreator"},
   "description": "DeepSeek 命令件：哑管道 + 记账——deepseek.chat 把模型调用原样发给 DeepSeek（成功回 text 与 token 用量，失败回四类结构化错误），deepseek.usage 按调用方汇总 token 账；key/model/base-url 住设置。服务无；skill 1 份；命令 2 条。",
   "type": "module",
@@ -29,18 +29,18 @@
   "//peer": "硬依赖 gwbCommands / gwbSettings / gwbData（inject）；gwbSkills 局部注入挂说明书。peer 写 ^<dev 钉>，dev 钉＝源上 dist-tags.latest（发版检票 devkit.release 照这条拒）",
   "peerDependencies": {
     "@godcreator/gwb-plugin-api": "^0.1.2",
-    "@godcreator/gwb-commands": "^0.4.4",
-    "@godcreator/gwb-settings": "^0.2.4",
-    "@godcreator/gwb-data": "^0.1.4",
-    "@godcreator/gwb-skills": "^0.4.2"
+    "@godcreator/gwb-commands": "^0.4.5",
+    "@godcreator/gwb-settings": "^0.3.1",
+    "@godcreator/gwb-data": "^0.1.5",
+    "@godcreator/gwb-skills": "^0.4.3"
   },
   "devDependencies": {
     "@godcreator/gwb-plugin-api": "0.1.2",
     "@godcreator/gwb-repo-kit": "0.3.0",
-    "@godcreator/gwb-commands": "0.4.4",
-    "@godcreator/gwb-settings": "0.2.4",
-    "@godcreator/gwb-data": "0.1.4",
-    "@godcreator/gwb-skills": "0.4.2",
+    "@godcreator/gwb-commands": "0.4.5",
+    "@godcreator/gwb-settings": "0.3.1",
+    "@godcreator/gwb-data": "0.1.5",
+    "@godcreator/gwb-skills": "0.4.3",
     "@types/node": "^24.0.0",
     "cordis": "4.0.0-rc.9",
     "oxlint": "1.76.0",
