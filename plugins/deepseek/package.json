@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@godcreator/gwb-plugin-api": "0.1.2",
-    "@godcreator/gwb-repo-kit": "0.2.3",
+    "@godcreator/gwb-repo-kit": "0.3.0",
     "@godcreator/gwb-commands": "0.4.4",
     "@godcreator/gwb-settings": "0.2.4",
     "@godcreator/gwb-data": "0.1.4",
