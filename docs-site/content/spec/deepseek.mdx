@@ -15,8 +15,8 @@ ugreen-nas-config 的 `.deepseek-key` 搬家到 gwb，做成独立可调用的�
 - [ ] key 走 `gwbSettings.define`（条目只写 id），缺 key 回结构化 bad_key；key 正本只在这一处，别处不存
 - [ ] 每次调用记账 `{at, caller, model, tokens}` 落 gwbData（caller 由调用方入参自带，件不嗅探），`deepseek.usage` 按调用方汇总可查
 - [ ] 件内零消费方策略：不重试、不熔断、不缓存——降级决策全在调用方
-- [ ] 隔离 home 挂上 ACTIVE；真调一次（真 key 成功、假 key 验 bad_key 路径，两个都算数）
-- [ ] `pnpm check` 全绿
+- [x] `pnpm check` 全绿
+- [ ] 真调一次（真 key 成功、假 key 验 bad_key 路径，两个都算数）——slow 档测试 + 隔离 home 各验一头
 
 ## 方案
 
@@ -27,3 +27,4 @@ node 半单命令件，无 UI。HTTP 直调 DeepSeek 的 OpenAI 兼容端点（�
 ## 进度
 
 - 2026-09-20 scaffold 落地（`@godcreator/gwb-deepseek`，模板形状），设计定案入本页。
+- 2026-09-20 实现落地：core.ts（纯逻辑）+ index.ts（接线）+ SKILL.md + 测试（23 条，含 slow 真调档），门禁全绿；模板窗格与 ping 已拆。剩：真调验证、隔离 home 上机验证、发版。
