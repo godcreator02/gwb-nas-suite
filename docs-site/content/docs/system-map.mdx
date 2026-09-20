@@ -1,0 +1,28 @@
+---
+title: 系统地图
+description: 拆成哪几块、各住哪、依赖方向是什么、先读哪块
+---
+
+# 系统地图
+
+**本页回答**：`gwb-nas-suite` 拆成哪几块、各住哪、块与块之间谁依赖谁、新来的人先读哪块。
+
+## 模块
+
+一件一包，包内自足（模板件形状：node 半 + 浏览器半 + 自述 + 四份测试）。每件的设计定位与在途活见交接区那页：
+
+| 模块 | 在哪 | 定位 | 先读 |
+| --- | --- | --- | --- |
+| deepseek | `plugins/deepseek/` | DeepSeek 命令管道（哑管道 + 记账） | spec/deepseek |
+| news-links | `plugins/news-links/` | 资讯精选阅读器（拉增量、出链接清单） | spec/news-links |
+| nas-board | `plugins/nas-board/` | NAS 体检看板（拉定案 JSON、画状态） | spec/nas-board |
+
+@@docfirst tree ../plugins depth=2 @@
+
+## 依赖方向
+
+仓内目标态只有一条件间依赖：news-links 经**命令总线**调 deepseek 的 `deepseek.chat`（不 import、不走网络直调）；nas-board 不依赖任何件。这条依赖落地前代码里尚无痕迹——正本是 spec/news-links，落地后回这页钉住调用处。三件共同依赖的是平台面（命令总线 / 设置 / 数据 / 窗格），照 gwb-devkit 的能力面走。
+
+## 每块一页
+
+每件在这一区将有自己的页（固定块：管什么 / 不知道什么 / 数据结构 / 提供的接口 / 依赖的接口 / 怎么单独测 / 代码地图），随 spec 拆解归梁时建；三件现在都是模板形状，无现状可钉。

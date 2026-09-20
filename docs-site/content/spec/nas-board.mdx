@@ -1,0 +1,32 @@
+---
+title: nas-board 件——NAS 体检看板（SMB 拉定案 JSON，gwb 原生画）
+description: 每日拉绿联 NAS 归档的定案 JSON 画看板，带新鲜度看门狗与一键复制询问
+---
+
+# nas-board 件：NAS 体检看板
+
+边界：NAS 侧生产（collect → judge → 归档定案 JSON，07:00 自循环）与部署正本全在
+ugreen-nas-config（单元 26091409bfn），上机那一刀攒在它那边做；本件只消费。契约是定案 JSON
+（schema 正本 `ugreen-nas-config/src/nasreport/schema.py`，v2；v1 旧格式宽容升格——但**旧历史
+不接**，2026-09-20 拍板，看板从上机日空起步）。
+
+## 验收
+
+- [ ] 数据源：SMB UNC 只读拉归档目录（路径走设置项）；拉不动时看板大声报「取数失败」，不静默
+- [ ] 看板：今日一行结论 + 三色总评 + 异常项表 + 近 30 天可用性竖条
+- [ ] 新鲜度看门狗置顶亮黄：最新日期 < 今天（过了 NAS 报告时刻之后）、seq 断号、schema 版本不认
+- [ ] 每日自动刷新一次 + 手动刷新按钮；件形态撑不起常驻定时器就退化为「打开面板发现过期即拉」（体验等价，不算妥协）
+- [ ] 视图每次从 JSON 现画，判定与结论一律取归档原值、不重算
+- [ ] 一键复制询问：当日定案压缩成结构化文本 + 一句「帮我解读」prompt，整段进剪贴板
+- [ ] 隔离 home 用 PC 回放归档（ugreen-nas-config 的 out/nasreport-fetch 快照）真数据验一轮
+- [ ] `pnpm check` 全绿
+
+## 方案
+
+命令面 `nas-board.refresh` / `nas-board.status` + 一格窗格。TS 侧自己实现定案 JSON 解析与
+v1 宽容升格（python 侧 schema.py 是对照正本，不引 python、不跨仓 import）。无模型、无推送、
+无渲染服务——转向定案（2026-09-20）在本仓 spec 与 ugreen-nas-config 的 drafts 双侧留档。
+
+## 进度
+
+- 2026-09-20 scaffold 落地（`@godcreator/gwb-nas-board`，模板形状），设计定案入本页。

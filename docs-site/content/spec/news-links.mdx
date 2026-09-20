@@ -1,0 +1,37 @@
+---
+title: news-links 件——资讯精选阅读器（DeepSeek 选、链接直达）
+description: FreshRSS+邮件增量、水位账本、DeepSeek 出精选链接清单，打开即拉；NAS 零新增部署
+---
+
+# news-links 件：资讯精选阅读器
+
+定案要点（2026-09-20，方案甲）：**纯 gwb 件，NAS 零新增部署**——FreshRSS 与 mail-archiver
+是 NAS 上已部署的独立服务，本件从 PC 组网直达它们的 API（通道均已实测）；交付只有**链接**
+（正文不搬，人自己点进去看）；微信全文抓取通道随转向整个退役（人点 `mp.weixin.qq.com` 链接
+是正常浏览形态，无风控暴露）。旧 nas-app 容器计划作废，水位与轮次归档搬进件 data。
+
+## 验收
+
+- [ ] RSS 侧：FreshRSS greader API（ClientLogin + stream/contents）取增量；盯源走设置项登记（feed id 会随 FreshRSS 重建变——已知坑，配置说明里要留这句话）
+- [ ] 邮件侧：mail-archiver REST（Bearer、id 倒序分页）取增量；发件人噪音名单可配（初版空着，看什么烦加什么）
+- [ ] 水位：两侧各自 max-id 账本（件 data），提交点 = 本地轮次归档落盘；at-least-once，宁重不漏
+- [ ] 转发去重：「//转发自:」「//@」前缀识别，两源互转的重复只留一条
+- [ ] 精选：调 `deepseek.chat`，输入条目元数据（标题 / 发件人 / 主题 / 短摘要），输出 picked `[{id, reason}]`——**只选不改写**，正文永远是源原文
+- [ ] 降级：模型失败退规则精选（噪音名单 + 全量兜底）照常归档，round 标 `curated_by: rules`；面板亮「模型连续降级 N 轮」
+- [ ] 阅读器：一轮一列表 `{来源, 标题, 链接, 一句理由}`；橘鸦早报链接每日置顶；未精选折叠成计数；邮件条目链到 mail-archiver 网页（单封直链形态待核，核不出就读时经 API 取正文就地展开）
+- [ ] 刷新：打开面板即拉 + 开着每小时刷 + 手动按钮
+- [ ] 无新内容明确说「无更新」，不调模型
+- [ ] 隔离 home 真链路验一轮（真取数 + 真精选 + 连跑两轮验水位推进与「无更新」路径）
+- [ ] `pnpm check` 全绿
+
+## 方案
+
+取数 → 水位过滤 → 去重 → 精选（deepseek.chat）→ 轮次归档（件 data，按日分组）→ 窗格列表。
+DeepSeek key 不在本件——经 deepseek 件走。初始盯源：橘鸦（feed/3）、黑鸦（feed/20），都是
+B 站动态源（经 FreshRSS）；邮件初版水位 seed 模式从当前最大 id 起、不总结 backlog——水位语义
+沿用 ugreen-nas-config `.god-flow/drafts/news-digest.md` 的设计，只是提交点从「推送成功」改成
+「本地归档落盘」。
+
+## 进度
+
+- 2026-09-20 scaffold 落地（`@godcreator/gwb-news-links`，模板形状），设计定案入本页。
