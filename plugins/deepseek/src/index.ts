@@ -36,7 +36,8 @@ const MODEL = 'model'
 const BASE_URL = 'base-url'
 const DEFAULT_BASE_URL = 'https://api.deepseek.com'
 const DEFAULT_MODEL = 'deepseek-chat'
-const JOURNAL_DOC = 'journal.json'
+/** gwbData 文档名一律 kebab-case（后缀 .json 由 data 件自己补）——带点号会被当场拒 */
+const JOURNAL_DOC = 'journal'
 
 /** 说明书随包发，从产物位置反推：dist/index.js 的上一级就是 skills/ */
 const SKILLS_DIR = new URL('../skills/', import.meta.url)

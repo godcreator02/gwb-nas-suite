@@ -82,7 +82,7 @@ describe('gwb-deepseek 挂载', () => {
     const r = (await h.commands[0]!.handler({ prompt: '你好' })) as { ok: boolean; error: string; detail: string }
     expect(r).toMatchObject({ ok: false, error: 'bad_key' })
     expect(r.detail).toContain('api-key')
-    expect(h.docs.has('journal.json')).toBe(false)
+    expect(h.docs.has('journal')).toBe(false)
   })
 
   it('参数不合法回 bad_args，detail 说清原因', async () => {

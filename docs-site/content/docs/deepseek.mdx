@@ -17,7 +17,7 @@ description: DeepSeek 命令管道——哑管道 + 记账的 node 半单形态�
 
 ## 数据结构
 
-记账文档 `journal.json`（gwbData）：条目数组，每条 `{ at, caller, model, ok, error?, usage? }`，尾部裁剪保持最多 500 条。
+记账文档 `journal`（gwbData，盘上落 `journal.json`；文档名一律 kebab-case，带点号 data 件当场拒——真机撞过）：条目数组，每条 `{ at, caller, model, ok, error?, usage? }`，尾部裁剪保持最多 500 条。
 
 ## 提供的接口
 
