@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-news-links",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {"name": "godcreator"},
   "description": "资讯精选阅读器：devkit 模板插件——一格窗格（你好 + 计数）与一条 ping 命令的最小完整形状。服务无；skill 0 份；命令 1 条。",
   "type": "module",
@@ -36,7 +36,6 @@
   },
   "devDependencies": {
     "@godcreator/gwb-plugin-api": "0.1.2",
-    "@godcreator/gwb-repo-kit": "0.2.3",
     "@godcreator/gwb-commands": "0.4.3",
     "@godcreator/gwb-shell": "0.9.2",
     "@godcreator/gwb-tokens": "0.1.4",

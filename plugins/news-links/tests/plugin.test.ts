@@ -1,15 +1,65 @@
 import { describe, expect, it } from 'vitest'
-import { registerPluginGuard } from '@godcreator/gwb-repo-kit'
 import { apply, name } from '../src/index.js'
 
-/**
- * 件的身份与挂载登记——**正本住 @godcreator/gwb-repo-kit**，这儿只报参数。
- * 本仓特有断言另起 describe；要直接摸挂载替身，import 它的 mountHarness。
- */
-registerPluginGuard({ describe, it, expect }, {
-  apply,
-  name,
-  pkg: '@godcreator/gwb-news-links',
-  pkgName: 'gwb-news-links',
-  short: 'news-links',
+interface RegisteredPane {
+  id: string
+  client?: string
+  style?: string
+}
+
+interface RegisteredCommand {
+  name: string
+  description: string
+  usage: string
+  plugin: string
+}
+
+/** 挂载替身：logger、立即执行的 effect，外壳与命令总线各给一个记录器 */
+function mountWithRecorders(): { panes: RegisteredPane[]; commands: RegisteredCommand[] } {
+  const panes: RegisteredPane[] = []
+  const commands: RegisteredCommand[] = []
+  const ctx = {
+    logger: () => ({ info() {}, warn() {}, error() {} }),
+    effect: (fn: () => unknown) => {
+      fn()
+      return () => {}
+    },
+    gwbShell: {
+      registerPane: (def: RegisteredPane) => {
+        panes.push(def)
+      },
+    },
+    gwbCommands: {
+      register: (def: RegisteredCommand) => {
+        commands.push(def)
+        return () => {}
+      },
+    },
+  }
+  apply(ctx as unknown as Parameters<typeof apply>[0])
+  return { panes, commands }
+}
+
+describe('gwb-news-links', () => {
+  it('插件名跟包名派生自同一个短名', () => {
+    expect(name).toBe('gwb-news-links')
+  })
+
+  it('挂载时登记了一格窗格，浏览器半与样式表都报了地址', () => {
+    const { panes } = mountWithRecorders()
+    expect(panes).toHaveLength(1)
+    expect(panes[0]?.id).toBe('main')
+    expect(panes[0]?.client).toMatch(/^file:\/\/.+\/client\.js$/)
+    expect(panes[0]?.style).toMatch(/^file:\/\/.+\/style\.css$/)
+  })
+
+  it('登记了一条 ping 命令：名字、归属、description 与 usage', () => {
+    const { commands } = mountWithRecorders()
+    expect(commands).toHaveLength(1)
+    const ping = commands[0]
+    expect(ping?.name).toBe('news-links.ping')
+    expect(ping?.plugin).toBe('@godcreator/gwb-news-links')
+    expect(ping?.description.trim()).not.toBe('')
+    expect(ping?.usage).toContain('无参数')
+  })
 })

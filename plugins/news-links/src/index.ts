@@ -35,7 +35,8 @@ export function apply(ctx: GwbContext): void {
     commands.register(
       {
         name: 'news-links.ping',
-        description: '模板起手命令：回插件名与时刻，证明这个件活着。无参数',
+        description: '模板起手命令：回插件名与时刻，证明这个件活着',
+        usage: '无参数。回 { plugin, time }：插件名与 ISO 时刻',
         plugin: '@godcreator/gwb-news-links',
       },
       async () => ({ ok: true, data: { plugin: name, time: new Date().toISOString() } }),
