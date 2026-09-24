@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-deepseek",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": {"name": "godcreator"},
   "description": "DeepSeek 命令件：哑管道 + 记账——deepseek.chat 把模型调用原样发给 DeepSeek（成功回 text 与 token 用量，失败回四类结构化错误），deepseek.usage 按调用方汇总 token 账；key/model/base-url 住设置。服务无；skill 1 份；命令 2 条。",
   "type": "module",

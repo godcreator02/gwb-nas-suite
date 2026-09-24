@@ -1,5 +1,5 @@
 import { type GwbContext } from '@godcreator/gwb-plugin-api'
-// 只为激活那几个件的 `declare module 'cordis'`——它们给 ctx 加上 gwbCommands / gwbSettings / gwbData / gwbSkills
+// 只为激活这几个插件的 `declare module 'cordis'`——它们给 ctx 加上 gwbCommands / gwbSettings / gwbData / gwbSkills
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-settings'
 import type {} from '@godcreator/gwb-data'
@@ -18,7 +18,7 @@ import {
 } from './core.js'
 
 /**
- * DeepSeek 命令件 node 半：**哑管道 + 记账**。
+ * DeepSeek 命令插件（只有 node 侧）：**哑管道 + 记账**。
  * `deepseek.chat` 把调用原样发给 DeepSeek、把结果原样带回——不重试、不熔断、不缓存，
  * 降级策略全在调用方；每次调用（含失败）记账落 gwbData，`deepseek.usage` 按调用方汇总。
  * key / model / base-url 住 gwbSettings，key 是 secret 型、不随包发、不进日志。
@@ -28,7 +28,7 @@ export const name = 'gwb-deepseek'
 /** 命令登记的 plugin 字段写包名——index 回执按它归属 */
 const PKG = '@godcreator/gwb-deepseek'
 
-/** 缺哪个都不挂——inject 是 cordis 的等待机制，不是建议 */
+/** 缺哪个服务，插件都不加载——inject 是 cordis 的等待机制，不是建议 */
 export const inject = ['gwbCommands', 'gwbSettings', 'gwbData']
 
 const API_KEY = 'api-key'
@@ -36,7 +36,7 @@ const MODEL = 'model'
 const BASE_URL = 'base-url'
 const DEFAULT_BASE_URL = 'https://api.deepseek.com'
 const DEFAULT_MODEL = 'deepseek-chat'
-/** gwbData 文档名一律 kebab-case（后缀 .json 由 data 件自己补）——带点号会被当场拒 */
+/** gwbData 文档名一律 kebab-case（后缀 .json 由 data 插件自己补）——带点号会被直接拒绝 */
 const JOURNAL_DOC = 'journal'
 
 /** 说明书随包发，从产物位置反推：dist/index.js 的上一级就是 skills/ */
@@ -46,7 +46,7 @@ function asString(value: unknown): string {
   return typeof value === 'string' ? value : ''
 }
 
-/** 记账落盘要的那半张 gwbData 的脸——结构性类型，不为它引包 */
+/** 记账落盘用到的 gwbData 方法——结构类型，不为它引入包 */
 interface DocStore {
   readDoc(doc: string): Promise<unknown>
   writeDoc(doc: string, value: unknown): Promise<void>
@@ -63,7 +63,7 @@ async function record(store: DocStore, warn: (message: string) => void, entry: J
 }
 
 export function apply(ctx: GwbContext): void {
-  // 件说话的正规出口：logger 进得了日志窗格，console 进不了
+  // 插件输出日志的正规途径：logger 的输出进日志窗格，console 的不进
   const log = ctx.logger(name)
   const commands = ctx.gwbCommands
   const settings = ctx.gwbSettings
@@ -72,7 +72,7 @@ export function apply(ctx: GwbContext): void {
   if (commands === undefined || settings === undefined || data === undefined) return
   log.info('DeepSeek 命令件 起来了')
 
-  // 说明书：一份说明书一个子目录（skills/deepseek/）。局部注入——skills 件不在，命令照常
+  // 说明书：一份说明书一个子目录（skills/deepseek/）。局部注入——skills 插件不在场，命令照常可用
   ctx.inject(['gwbSkills'], (c) => {
     c.effect(() => c.gwbSkills.register(SKILLS_DIR))
   })
@@ -99,13 +99,17 @@ export function apply(ctx: GwbContext): void {
     default: DEFAULT_BASE_URL,
   })
 
-  // 命令面：register 回注销函数，包在 ctx.effect 里——条目停了名字也跟着摘（2026-09-09 撞过）
+  // 命令：register 返回注销函数，放进 ctx.effect——插件条目停用时命令名也跟着注销（2026-09-09 遇到过）
   ctx.effect(() =>
     commands.register(
       {
         name: 'deepseek.chat',
         description:
-          '把一次 DeepSeek 调用原样发出去：{ prompt, system?, jsonMode?, timeoutMs?, caller?, model? }——成功回 { text, usage:{promptTokens,completionTokens,totalTokens}, model, caller }；失败回 { error: timeout|rate_limit|bad_key|bad_response, detail }。哑管道：不重试不缓存，降级策略在调用方；caller 自报家门进记账。见 skill「deepseek」',
+          '把一次 DeepSeek 调用原样发出去、把结果原样带回。哑管道：不重试不缓存，降级策略在调用方；caller 写明调用方、进记账。见 skill「deepseek」',
+        usage:
+          '{ prompt 必给（非空字符串）, system?, jsonMode?（布尔；DeepSeek 要求 prompt 里出现 json 字样）, timeoutMs?（正数毫秒，缺省 60000，超过 110000 按 110000）, caller?（非空字符串，截到 64 字，缺省 adhoc）, model?（非空字符串，缺省取设置 model）}。' +
+          '成功回 { ok: true, data: { text, usage: { promptTokens, completionTokens, totalTokens }, model, caller } }；' +
+          '失败回 { ok: false, error: "timeout" | "rate_limit" | "bad_key" | "bad_response" | "bad_args"（参数不合法）, detail }',
         plugin: PKG,
       },
       async (args: unknown) => {
@@ -173,8 +177,10 @@ export function apply(ctx: GwbContext): void {
     commands.register(
       {
         name: 'deepseek.usage',
-        description:
-          '按调用方汇总记账：{ days? }（缺省 30）——回 { days, byCaller:[{caller,calls,ok,failed,totalTokens}], total }。无参数也行',
+        description: '按调用方汇总 DeepSeek 调用的记账：调用次数、成功与失败数、token 总数',
+        usage:
+          '{ days?（正整数，缺省 30，上限 3650；不是正整数按 30）}，不给参数也行。' +
+          '回 { ok: true, data: { days, byCaller: [{ caller, calls, ok, failed, totalTokens }]（按 totalTokens 降序）, total: { caller: "全部", calls, ok, failed, totalTokens } } }',
         plugin: PKG,
       },
       async (args: unknown) => {

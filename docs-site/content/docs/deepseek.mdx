@@ -1,27 +1,27 @@
 ---
-title: deepseek 件
-description: DeepSeek 命令管道——哑管道 + 记账的 node 半单形态件
+title: deepseek 插件
+description: DeepSeek 命令管道——哑管道 + 记账，只有 node 侧的插件
 ---
 
-# deepseek 件
+# deepseek 插件
 
-**本页回答**：deepseek 这件管什么、不知道什么、接口长什么样、怎么单独测。
+**本页回答**：deepseek 插件管什么、不知道什么、接口长什么样、怎么单独测。
 
 ## 管什么
 
-把 DeepSeek 调用做成全工作台共用的哑管道：一条 `deepseek.chat` 原样发、原样回（四类结构化错误），一条 `deepseek.usage` 按调用方汇总 token 记账。key / model / base-url 住设置，key 正本只在这一件。**不带任何消费方策略**——不重试、不熔断、不缓存，降级决策全在调用方（这是硬边界：第二个消费者不能被第一个消费者的策略绑架）。
+把 DeepSeek 调用做成全工作台共用的哑管道：一条 `deepseek.chat` 原样发、原样回（四类结构化错误），一条 `deepseek.usage` 按调用方汇总 token 记账。key / model / base-url 住设置，key 正本只在这个插件里。**不带任何消费方策略**——不重试、不熔断、不缓存，降级决策全在调用方（这是硬边界：第二个调用方不能被第一个调用方的策略限制住）。
 
 ## 不知道什么
 
-不知道谁在调它（caller 由调用方入参自报，件不嗅探）、不知道调用方该怎么降级、不知道 prompt 与应答内容（正文不进日志，日志只有 caller / model / token 数）、不做 UI（无窗格）。
+不知道谁在调它（caller 由调用方在参数里给出，插件不自行探测）、不知道调用方该怎么降级、不知道 prompt 与应答内容（正文不进日志，日志只有 caller / model / token 数）、不做 UI（无窗格）。
 
 ## 数据结构
 
-记账文档 `journal`（gwbData，盘上落 `journal.json`；文档名一律 kebab-case，带点号 data 件当场拒——真机撞过）：条目数组，每条 `{ at, caller, model, ok, error?, usage? }`，尾部裁剪保持最多 500 条。
+记账文档 `journal`（gwbData，磁盘上存为 `journal.json`；文档名一律 kebab-case，带点号会被 data 插件直接拒绝——实机遇到过）：条目数组，每条 `{ at, caller, model, ok, error?, usage? }`，尾部裁剪保持最多 500 条。
 
 ## 提供的接口
 
-命令面两条（归属 `@godcreator/gwb-deepseek`）：`deepseek.chat`、`deepseek.usage`，参数形状写在命令 description 里（agent 看得见的就是那一句）；语义正本住随包 skill「deepseek」。
+命令两条（归属 `@godcreator/gwb-deepseek`）：`deepseek.chat`、`deepseek.usage`。description 一句话说做什么，参数与回执形状写在命令的 usage 里（agent 经 search 看到的就是这两项）；语义正本在随包 skill「deepseek」。
 
 ## 依赖的接口
 
@@ -30,18 +30,18 @@ description: DeepSeek 命令管道——哑管道 + 记账的 node 半单形态�
 | `gwbCommands` | 注册两条命令 | gwb-commands | 自搭替身（tests/plugin.test.ts） |
 | `gwbSettings` | 定义并读 api-key / model / base-url | gwb-settings | 自搭替身 |
 | `gwbData` | 记账文档读写 | gwb-data | 自搭替身 |
-| `gwbSkills`（局部注入） | 挂随包说明书 | gwb-skills | 自搭替身 |
+| `gwbSkills`（局部注入） | 登记随包说明书 | gwb-skills | 自搭替身 |
 
-三张脸是硬 inject，缺哪件都不挂；skills 是局部注入，缺了命令照常：
+前三个服务在顶层 inject 里，缺哪个插件都不加载；skills 是局部注入，缺了命令照常可用：
 
 {/* ref file="../plugins/deepseek/src/index.ts" lines="32-32" */}
 
 ## 怎么单独测
 
-纯逻辑全在 core.ts（参数收窄 / 请求组装 / 错误归类 / 应答解析 / 记账裁剪汇总），喂输入看输出、不碰网络；挂载面用自搭替身断言命令 / 设置 / 说明书登记与 bad_key 短路；真调一次走 slow 档（`DEEPSEEK_API_KEY` 环境变量给 key，`pnpm test:all` 才跑）。
+纯逻辑全在 core.ts（参数收窄 / 请求组装 / 错误归类 / 应答解析 / 记账裁剪汇总），给输入、看输出，不碰网络；加载部分用自搭替身断言命令 / 设置 / 说明书的登记与 bad_key 直接返回；真调一次的测试标为 slow（`DEEPSEEK_API_KEY` 环境变量给 key，`pnpm test:all` 才跑）。
 
 {/* ref file="../plugins/deepseek/src/core.ts" */}
 
 ## 代码地图
 
-**在哪**：`plugins/deepseek/`。**先读**：`src/core.ts`（纯逻辑，一个文件读完）→ `src/index.ts`（接线）。**读序**：index 吃 core，core 不认识 cordis。**可跳过**：`dist/`（产物）、`skills/deepseek/SKILL.md`（是发布物，正文与命令 description 同源）。
+**在哪**：`plugins/deepseek/`。**先读**：`src/core.ts`（纯逻辑，一个文件读完）→ `src/index.ts`（接线）。**读序**：index 依赖 core，core 不认识 cordis。**可跳过**：`dist/`（产物）、`skills/deepseek/SKILL.md`（随包发布的说明书，正文与命令的 description / usage 讲的是同一套参数）。

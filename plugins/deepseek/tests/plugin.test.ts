@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { apply, name } from '../src/index.js'
 
 /**
- * 挂载与命令面——替身自己搭（repo-kit 的正本守卫是给「带窗格的模板件」定死的，
- * 本件无窗格；它家 mountHarness 也不给 gwbSettings / gwbData / handler，不够用）。
- * 多给三张脸：gwbSettings（define 记录器 + get 回 undefined）、gwbData（文档存取）、
- * gwbSkills（register 记录器）；命令的 handler 留下来，好真调 bad_key 路径。
+ * 加载与命令——替身自己写（repo-kit 的正本守卫只适用于带窗格的模板插件，
+ * 本插件没有窗格；repo-kit 的 mountHarness 也不提供 gwbSettings / gwbData / handler，不够用）。
+ * 多提供三个服务：gwbSettings（define 记录器 + get 回 undefined）、gwbData（文档存取）、
+ * gwbSkills（register 记录器）；命令的 handler 留下来，以便真调 bad_key 路径。
  */
 function harness() {
-  const commands: Array<{ def: { name: string; plugin: string; description: string }; handler: (args: unknown) => Promise<unknown> }> = []
+  const commands: Array<{ def: { name: string; plugin: string; description: string; usage: string }; handler: (args: unknown) => Promise<unknown> }> = []
   const defines: Array<{ key: string; type: string }> = []
   const skills: string[] = []
   const docs = new Map<string, unknown>()
@@ -23,7 +23,7 @@ function harness() {
       return () => {}
     },
     gwbCommands: {
-      register: (def: { name: string; plugin: string; description: string }, handler: (args: unknown) => Promise<unknown>) => {
+      register: (def: { name: string; plugin: string; description: string; usage: string }, handler: (args: unknown) => Promise<unknown>) => {
         commands.push({ def, handler })
         return () => {}
       },
@@ -56,16 +56,18 @@ describe('gwb-deepseek 挂载', () => {
     expect(name).toBe('gwb-deepseek')
   })
 
-  it('两条命令 deepseek.chat / deepseek.usage：归属本包、描述带参数形状', () => {
+  it('两条命令 deepseek.chat / deepseek.usage：归属本包、description 与 usage 非空、usage 带参数形状', () => {
     const h = harness()
     apply(h.ctx as never)
     expect(h.commands.map((c) => c.def.name)).toEqual(['deepseek.chat', 'deepseek.usage'])
     for (const c of h.commands) {
       expect(c.def.plugin).toBe('@godcreator/gwb-deepseek')
       expect(c.def.description.length).toBeGreaterThan(10)
+      expect(typeof c.def.usage).toBe('string')
+      expect(c.def.usage.trim()).not.toBe('')
     }
-    expect(h.commands[0]!.def.description).toContain('{ prompt')
-    expect(h.commands[1]!.def.description).toContain('days')
+    expect(h.commands[0]!.def.usage).toContain('{ prompt')
+    expect(h.commands[1]!.def.usage).toContain('days')
   })
 
   it('声明三项设置：api-key（secret）、model、base-url；说明书目录登记一份', () => {
