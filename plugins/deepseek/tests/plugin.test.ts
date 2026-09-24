@@ -2,10 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { apply, name } from '../src/index.js'
 
 /**
- * 加载与命令——替身自己写（repo-kit 的正本守卫只适用于带窗格的模板插件，
- * 本插件没有窗格；repo-kit 的 mountHarness 也不提供 gwbSettings / gwbData / handler，不够用）。
- * 多提供三个服务：gwbSettings（define 记录器 + get 回 undefined）、gwbData（文档存取）、
- * gwbSkills（register 记录器）；命令的 handler 留下来，以便真调 bad_key 路径。
+ * 加载与命令。替身提供四个服务：gwbCommands（register 记录器，handler 留下来以便真调 bad_key 路径）、
+ * gwbSettings（define 记录器 + get 返回 undefined）、gwbData（文档存取）、gwbSkills（register 记录器）。
  */
 function harness() {
   const commands: Array<{ def: { name: string; plugin: string; description: string; usage: string }; handler: (args: unknown) => Promise<unknown> }> = []

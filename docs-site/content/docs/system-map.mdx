@@ -1,19 +1,19 @@
 ---
 title: 系统地图
-description: 拆成哪几块、各住哪、依赖方向是什么、先读哪块
+description: 拆成哪几块、各在哪、依赖方向是什么、先读哪块
 ---
 
 # 系统地图
 
-**本页回答**：`gwb-nas-suite` 拆成哪几块、各住哪、块与块之间谁依赖谁、新来的人先读哪块。
+**本页回答**：`gwb-nas-suite` 拆成哪几块、各在哪、块与块之间谁依赖谁、新来的人先读哪块。
 
 ## 模块
 
-一件一包，包内自足（模板件形状：node 半 + 浏览器半 + 自述 + 四份测试）。每件的设计定位与在途活见交接区那页：
+一个插件一个包，包内自足（devkit 模板的形状：node 侧、浏览器侧、样式，外加产物、前缀、加载三份测试；deepseek 没有窗格，只有 node 侧）。每个插件的设计定位与在途的活见交接区对应的页：
 
 | 模块 | 在哪 | 定位 | 先读 |
 | --- | --- | --- | --- |
-| deepseek | `plugins/deepseek/` | DeepSeek 命令管道（哑管道 + 记账） | [deepseek 件](/docs/deepseek) |
+| deepseek | `plugins/deepseek/` | DeepSeek 命令管道（哑管道 + 记账） | [deepseek 插件](/docs/deepseek) |
 | news-links | `plugins/news-links/` | 资讯精选阅读器（拉增量、出链接清单） | spec/news-links |
 | nas-board | `plugins/nas-board/` | NAS 体检看板（拉定案 JSON、画状态） | spec/nas-board |
 
@@ -21,8 +21,10 @@ description: 拆成哪几块、各住哪、依赖方向是什么、先读哪块
 
 ## 依赖方向
 
-仓内目标态只有一条件间依赖：news-links 经**命令总线**调 deepseek 的 `deepseek.chat`（不 import、不走网络直调）；nas-board 不依赖任何件。这条依赖落地前代码里尚无痕迹——正本是 spec/news-links，落地后回这页钉住调用处。三件共同依赖的是平台面（命令总线 / 设置 / 数据 / 窗格），照 gwb-devkit 的能力面走。
+仓内的目标形态只有一条插件之间的依赖：news-links 经**命令总线**调 deepseek 的 `deepseek.chat`（不 import、不走网络直调）；nas-board 不依赖任何插件。这条依赖还没实现，代码里没有痕迹——设计写在 spec/news-links，实现之后回这页引用调用处。三个插件共同依赖的是平台提供的服务（命令总线、设置、数据、窗格），按 gwb-devkit 说明书里列出的服务使用。
+
+`package.json` 里，三个插件的 `peerDependencies` 都只有内核包 `@godcreator/gwb-kernel-desktop`（范围是验证时那个内核的 `^x.y.z`）；用到的别的插件与词汇表包只取类型，写在 dev。news-links 与 nas-board 页面上的 react 由内核包经 importmap 提供，样式的主题令牌从外壳的 `theme.reference.css` 取。规矩的正本在 devkit 文档站「依赖怎么写」。
 
 ## 每块一页
 
-每件在这一区将有自己的页（固定块：管什么 / 不知道什么 / 数据结构 / 提供的接口 / 依赖的接口 / 怎么单独测 / 代码地图），随 spec 拆解归梁时建；三件现在都是模板形状，无现状可钉。
+每个插件在这一区都会有自己的页（固定块：管什么 / 不知道什么 / 数据结构 / 提供的接口 / 依赖的接口 / 怎么单独测 / 代码地图），随 spec 拆解归梁时建；news-links 与 nas-board 现在还是模板形状，没有可以引用的现状。

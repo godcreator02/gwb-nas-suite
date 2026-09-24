@@ -1,0 +1,17 @@
+---
+born-at: 2026-09-24T18:30
+type: choice
+parent: [2026-09-20-gwb-nas-suite-root]
+label: 内核 0.4 依赖
+domain: 依赖与发版
+---
+
+## 背景
+
+内核与词汇表包 0.4.x 发布后（cordis 换到 4.0.0-rc.10 一组，内核包装进每个 home，0.4.1 起内核包用 `gwb.shared` 给页面 importmap 提供 react），`devkit.audit-deps` 报这个仓三个插件全部不合格：peer 里写着词汇表包、命令总线、设置、数据、说明书、外壳、`gwb-tokens`、`gwb-shared-react`（`peer-not-cordis`），dev 里的词汇表包 0.1.2 与外壳 0.9.2 已出范围（`out-of-range`）。deepseek 还留着已退役的 `gwb-repo-kit` 自述守卫测试。news-links 与 nas-board 0.1.1 从没发过版，形状是更早的 devkit 模板：react 从 `gwb-shared-react` 取，主题令牌从 `gwb-tokens` 取。
+
+## 结论与边界
+
+三个插件的 peer 只写内核包 `^0.4.1`（node 侧产物都没有按值 import cordis，所以不写 peer `cordis`），其余 `@godcreator` 包挪到 dev、写 `^<源上 latest>`，cordis dev 跟到 4.0.0-rc.10；deepseek 删掉 repo-kit 与自述守卫测试。news-links 与 nas-board 不再修补旧模板，而是整份换成 devkit 现行模板的写法：`build.ts` 的外置名单从装好的内核包清单 `gwb.shared` 读，样式改从外壳 `@godcreator/gwb-shell/theme.reference.css` 取令牌，`gwb-shared-react` 与 `gwb-tokens` 从依赖里删掉；产物测试的 node 侧放行名单改成 node 内置模块、electron、cordis，浏览器侧只放行内核包 `gwb.shared` 的键。
+
+边界：两个模板形状的插件只换了依赖与构建写法，窗格与 ping 命令的行为没变；spec 里的功能设计一行没动。版本号沿用已提交未发的 deepseek 0.1.3、news-links 与 nas-board 0.1.1（依赖写法与构建方式的改动不碰命令名、参数与回执，按 gwb-release 属于升 y）。

@@ -2,7 +2,7 @@
   "name": "@godcreator/gwb-deepseek",
   "version": "0.1.3",
   "author": {"name": "godcreator"},
-  "description": "DeepSeek 命令件：哑管道 + 记账——deepseek.chat 把模型调用原样发给 DeepSeek（成功回 text 与 token 用量，失败回四类结构化错误），deepseek.usage 按调用方汇总 token 账；key/model/base-url 住设置。服务无；skill 1 份；命令 2 条。",
+  "description": "DeepSeek 命令插件：deepseek.chat 把模型调用原样发给 DeepSeek 并原样带回结果，deepseek.usage 按调用方汇总 token 用量；key、模型与 API 地址存在设置里。",
   "type": "module",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
@@ -10,39 +10,35 @@
   },
   "files": ["dist", "src", "skills"],
   "gwb": {
-    "title": "DeepSeek 命令件"
+    "title": "DeepSeek 命令插件"
   },
   "keywords": ["gwb", "gwb-plugin"],
-  "//repository": "发到 gitea 后补上这一条：{ type: git, url: https://git.tianshen02.online:28377/godcreator/<仓>.git }——gitea 发布时读它把包链到仓（2026-09-18 实测：整包上链、跨 owner 也解析）",
+  "//repository": "发到 gitea 后补上这一条：{ type: git, url: https://git.tianshen02.online:28377/godcreator/<仓>.git }——gitea 发布时读它把包关联到仓（2026-09-18 实测：整个包关联到仓，仓与包不在同一个 owner 下也关联得上）",
   "scripts": {
-    "//build": "node 半单形态件：tsc 一步（无浏览器半、无样式）",
+    "//build": "只有 node 侧：tsc 一步（没有浏览器侧，没有样式）",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint . --deny-warnings",
     "test": "vitest run --passWithNoTests --tags-filter=!slow",
     "test:all": "vitest run --passWithNoTests",
     "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
-    "//prepublishOnly": "发版前强制构建一次。pnpm check 不构建，少了这条会把上一版的 dist 原样发出去——静默的",
+    "//prepublishOnly": "发版前强制构建一次。pnpm check 不构建，少了这条会把上一版的 dist 原样发出去，而且不报错",
     "prepublishOnly": "pnpm build"
   },
   "engines": { "node": ">=24" },
-  "//peer": "硬依赖 gwbCommands / gwbSettings / gwbData（inject）；gwbSkills 局部注入挂说明书。peer 写 ^<dev 钉>，dev 钉＝源上 dist-tags.latest（发版检票 devkit.release 照这条拒）",
+  "//peerDependencies": "内核包的 ^ 范围就是这个插件兼容哪个内核。node 侧构建产物没有按值 import cordis（只 import type），所以 peer 里没有 cordis。规矩见 devkit 文档站「依赖怎么写」与「兼容哪个内核」",
   "peerDependencies": {
-    "@godcreator/gwb-plugin-api": "^0.1.2",
-    "@godcreator/gwb-commands": "^0.4.5",
-    "@godcreator/gwb-settings": "^0.3.1",
-    "@godcreator/gwb-data": "^0.1.5",
-    "@godcreator/gwb-skills": "^0.4.3"
+    "@godcreator/gwb-kernel-desktop": "^0.4.1"
   },
+  "//devDependencies": "命令总线、设置、数据、说明书四个插件与词汇表包只取类型，运行时经 inject 使用（gwbSkills 是局部注入）；cordis 只给本地构建与类型检查",
   "devDependencies": {
-    "@godcreator/gwb-plugin-api": "0.1.2",
-    "@godcreator/gwb-repo-kit": "0.3.0",
-    "@godcreator/gwb-commands": "0.4.5",
-    "@godcreator/gwb-settings": "0.3.1",
-    "@godcreator/gwb-data": "0.1.5",
-    "@godcreator/gwb-skills": "0.4.3",
+    "@godcreator/gwb-commands": "^0.4.6",
+    "@godcreator/gwb-data": "^0.1.6",
+    "@godcreator/gwb-plugin-api": "^0.4.1",
+    "@godcreator/gwb-settings": "^0.3.2",
+    "@godcreator/gwb-skills": "^0.4.4",
     "@types/node": "^24.0.0",
-    "cordis": "4.0.0-rc.9",
+    "cordis": "4.0.0-rc.10",
     "oxlint": "1.76.0",
     "oxlint-tsgolint": "7.0.2001",
     "typescript": "^7.0.2",

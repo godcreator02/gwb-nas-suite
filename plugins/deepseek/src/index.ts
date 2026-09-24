@@ -1,4 +1,4 @@
-import { type GwbContext } from '@godcreator/gwb-plugin-api'
+import type { GwbContext } from '@godcreator/gwb-plugin-api'
 // 只为激活这几个插件的 `declare module 'cordis'`——它们给 ctx 加上 gwbCommands / gwbSettings / gwbData / gwbSkills
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-settings'
@@ -52,7 +52,7 @@ interface DocStore {
   writeDoc(doc: string, value: unknown): Promise<void>
 }
 
-/** 记账失败只出声、不改动回执——成功的调用不能因为记账丢了变成失败 */
+/** 记账失败只写一条警告日志、不改动回执——成功的调用不能因为记账没写上变成失败 */
 async function record(store: DocStore, warn: (message: string) => void, entry: JournalEntry): Promise<void> {
   try {
     const current = await store.readDoc(JOURNAL_DOC)
@@ -70,9 +70,9 @@ export function apply(ctx: GwbContext): void {
   const data = ctx.gwbData
   // inject 保证了它们在，这几句只是把类型收窄
   if (commands === undefined || settings === undefined || data === undefined) return
-  log.info('DeepSeek 命令件 起来了')
+  log.info('DeepSeek 命令插件已加载')
 
-  // 说明书：一份说明书一个子目录（skills/deepseek/）。局部注入——skills 插件不在场，命令照常可用
+  // 说明书：一份说明书一个子目录（skills/deepseek/）。局部注入——说明书插件没装，命令照常可用
   ctx.inject(['gwbSkills'], (c) => {
     c.effect(() => c.gwbSkills.register(SKILLS_DIR))
   })
