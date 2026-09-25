@@ -9,22 +9,22 @@ description: 拆成哪几块、各在哪、依赖方向是什么、先读哪块
 
 ## 模块
 
-一个插件一个包，配置都在包内（devkit 模板的形状：`build.ts` 用 esbuild 打 node 侧与浏览器侧，Tailwind 出样式；deepseek 没有窗格，只有 node 侧）。每个插件的设计定位与在途的活见交接区对应的页：
+一个插件一个包，配置都在包内（devkit 模板的形状：`build.ts` 用 esbuild 打 node 侧与浏览器侧，Tailwind 出样式；deepseek 没有窗格，只有 node 侧）。每个插件的设计定位与在途的活见未来区的实施方案页：
 
 | 模块 | 在哪 | 定位 | 先读 |
 | --- | --- | --- | --- |
 | deepseek | `plugins/deepseek/` | DeepSeek 命令管道（哑管道 + 记账） | [deepseek 插件](/docs/deepseek) |
-| news-links | `plugins/news-links/` | 资讯精选阅读器（拉增量、出链接清单） | spec/news-links |
-| nas-board | `plugins/nas-board/` | NAS 体检看板（拉定案 JSON、画状态） | spec/nas-board |
+| news-links | `plugins/news-links/` | 资讯精选阅读器（拉增量、出链接清单） | [实施方案](/future/spec/news-links) |
+| nas-board | `plugins/nas-board/` | NAS 体检看板（拉定案 JSON、画状态） | [实施方案](/future/spec/nas-board) |
 
-{/* tree dir="../plugins" depth="2" */}
+{/* tree dir="../plugins" depth="2" hash="17eb99e57064" */}
 
 ## 依赖方向
 
-仓内的目标形态只有一条插件之间的依赖：news-links 经**命令总线**调 deepseek 的 `deepseek.chat`（不 import、不走网络直调）；nas-board 不依赖任何插件。这条依赖还没实现，代码里没有痕迹，设计写在 spec/news-links。三个插件依赖的是平台提供的服务：deepseek 用命令总线、设置、数据，news-links 与 nas-board 用命令总线与外壳（窗格）。
+仓内的目标形态只有一条插件之间的依赖：news-links 经**命令总线**调 deepseek 的 `deepseek.chat`（不 import、不走网络直调）；nas-board 不依赖任何插件。这条依赖还没实现，代码里没有痕迹，设计写在 [news-links 的实施方案](/future/spec/news-links)。三个插件依赖的是平台提供的服务：deepseek 用命令总线、设置、数据，news-links 与 nas-board 用命令总线与外壳（窗格）。
 
 三个插件的 `peerDependencies` 写内核包 `@godcreator/gwb-kernel-desktop` 与用到的插件：deepseek 写命令总线、设置、数据与说明书（说明书只在局部注入里用，标可选），news-links 与 nas-board 写命令总线与外壳。news-links 与 nas-board 样式的主题令牌从外壳的 `theme.reference.css` 取。
 
 ## 每块一页
 
-deepseek 有自己的一页；news-links 与 nas-board 此刻还是模板形状，没有可以引用的现状，设计在交接区对应的页里。
+deepseek 有自己的一页；news-links 与 nas-board 此刻还是模板形状，没有可以引用的现状，设计在未来区的实施方案页里。

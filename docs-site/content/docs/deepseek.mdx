@@ -34,13 +34,13 @@ description: DeepSeek 命令管道——哑管道 + 记账，只有 node 侧的�
 
 前三个服务在顶层 inject 里，缺哪个插件都不加载；skills 是局部注入，缺了命令照常可用：
 
-{/* ref file="../plugins/deepseek/src/index.ts" lines="32-32" */}
+{/* ref file="../plugins/deepseek/src/index.ts" lines="32-32" hash="078897cb07e9" blob="1d3b932a6886" */}
 
 ## 怎么单独测
 
 纯逻辑全在 core.ts（参数收窄 / 请求组装 / 错误归类 / 应答解析 / 记账裁剪汇总），给输入、看输出，不碰网络；加载部分用自搭替身断言命令 / 设置 / 说明书的登记与 bad_key 直接返回；真调一次的测试标为 slow（`DEEPSEEK_API_KEY` 环境变量给 key，`pnpm test:all` 才跑）。
 
-{/* ref file="../plugins/deepseek/src/core.ts" */}
+{/* ref file="../plugins/deepseek/src/core.ts" hash="1b36afe93ae6" blob="681cf5847866" */}
 
 ## 代码地图
 

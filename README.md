@@ -6,14 +6,14 @@
 
 NAS 监控与资讯消费的 gwb 插件仓（仓根只是 workspace 根目录，三个插件在 `plugins/`）：
 
-| 插件         | 包名                           | 干什么                                                                   |
-| ---------- | ---------------------------- | --------------------------------------------------------------------- |
-| deepseek   | `@godcreator/gwb-deepseek`   | DeepSeek 命令管道——一条 `deepseek.chat` 给整个工作台用，API key 只存在这个插件的设置里，每次调用都记账 |
-| news-links | `@godcreator/gwb-news-links` | 资讯精选阅读器——FreshRSS 与邮件的增量，DeepSeek 挑链接，打开时拉取                           |
-| nas-board  | `@godcreator/gwb-nas-board`  | NAS 体检看板——经 SMB 拉绿联 NAS 每日的定案 JSON，在 gwb 窗格里画                         |
+| 插件 | 包名 | 干什么 |
+| --- | --- | --- |
+| deepseek | `@godcreator/gwb-deepseek` | DeepSeek 命令管道——一条 `deepseek.chat` 给整个工作台用，API key 只存在这个插件的设置里，每次调用都记账 |
+| news-links | `@godcreator/gwb-news-links` | 资讯精选阅读器——FreshRSS 与邮件的增量，DeepSeek 挑链接，打开时拉取 |
+| nas-board | `@godcreator/gwb-nas-board` | NAS 体检看板——经 SMB 拉绿联 NAS 每日的定案 JSON，在 gwb 窗格里画 |
 
 NAS 侧数据生产与部署在 ugreen-nas-config（单元 26091409bfn）。deepseek 已实现，news-links 与 nas-board 还在做，
-设计与验收清单见文档站交接区。
+设计与验收清单见文档站未来区的实施方案（`docs-site/content/future/spec/`）。
 
 ## 怎么装
 
@@ -26,4 +26,4 @@ deepseek 插件装上后 `deepseek.chat {prompt:"…"}` 有回执；news-links /
 ## 文档
 
 `docs-site/` 是文档站：`cd docs-site && pnpm install && pnpm dev`，看 `http://localhost:4327`。
-这份 README 是生成物，正本是 `docs-site/content/outputs/readme.mdx`。
+这份 README 是生成物，正本是 `docs-site/content/docs/outputs/readme.mdx`。
