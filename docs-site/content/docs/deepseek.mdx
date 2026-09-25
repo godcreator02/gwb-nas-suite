@@ -1,47 +1,86 @@
 ---
 title: deepseek 插件
-description: DeepSeek 命令管道——哑管道 + 记账，只有 node 侧的插件
+description: 整个工作台共用的 DeepSeek 调用入口：deepseek.chat 原样转发、按四类错误回执，每次调用记一笔账，deepseek.usage 按调用方汇总；key 只存在这个插件的设置里
 ---
 
-# deepseek 插件
+**本页回答**：deepseek 插件对外能做什么、和哪几个插件与外部服务相接、每条接缝传什么、谁负责什么、不做什么。
 
-**本页回答**：deepseek 插件管什么、不知道什么、接口长什么样、怎么单独测。
+工作台里任何地方要用模型——agent 经 MCP 入口调，别的插件（以后的 news-links）经命令总线调——都走同一条命令 `deepseek.chat`，用同一份 API key。插件把请求原样发给 DeepSeek、把结果原样带回，失败归成四类结构化错误，**不重试、不熔断、不缓存**：要不要再调、怎么降级由调用方决定。这条边界是有意的：第二个调用方不该被第一个调用方需要的策略限制住。每次真正发出去的调用都记一笔账（时刻、调用方、模型、成败、token 数），`deepseek.usage` 按调用方汇总。插件只有 node 侧，没有窗格。
 
-## 管什么
+<DeepseekSeams />
 
-把 DeepSeek 调用做成全工作台共用的哑管道：一条 `deepseek.chat` 原样发、原样回（四类结构化错误），一条 `deepseek.usage` 按调用方汇总 token 记账。key / model / base-url 住设置，key 正本只在这个插件里。**不带任何消费方策略**——不重试、不熔断、不缓存，降级决策全在调用方（这是硬边界：第二个调用方不能被第一个调用方的策略限制住）。
+## 六条接缝
 
-## 不知道什么
+图上的编号就是下面的编号。本插件自己的代码分两层：`src/index.ts` 是接线与两条命令的处理函数，`src/core.ts` 是不碰网络、不碰 cordis 的纯函数，接缝上的数据形状大多定义在后者。
 
-不知道谁在调它（caller 由调用方在参数里给出，插件不自行探测）、不知道调用方该怎么降级、不知道 prompt 与应答内容（正文不进日志，日志只有 caller / model / token 数）、不做 UI（无窗格）。
+### ① 命令总线 ↔ 两条命令
 
-## 数据结构
+加载时登记 `deepseek.chat` 与 `deepseek.usage`，参数形状与回执写在各自的 `usage` 里（agent 经 `search` 看到的就是它）；语义的正本是随包说明书 [deepseek](/docs/outputs/skills/deepseek)。调用时总线把参数原样交给处理函数：参数先经 `parseChatArgs` 收窄，不合法回 `bad_args`，不发请求、不记账。按名字转发、核对登记方包名、卸载时注销都是命令总线的事，本插件不包 `ctx.effect`。
 
-记账文档 `journal`（gwbData，磁盘上存为 `journal.json`；文档名一律 kebab-case，带点号会被 data 插件直接拒绝——实机遇到过）：条目数组，每条 `{ at, caller, model, ok, error?, usage? }`，尾部裁剪保持最多 500 条。
+{/* has file="../plugins/deepseek/src/index.ts" text="name: 'deepseek.chat'" */}
 
-## 提供的接口
+{/* has file="../plugins/deepseek/src/index.ts" text="name: 'deepseek.usage'" */}
 
-命令两条（归属 `@godcreator/gwb-deepseek`）：`deepseek.chat`、`deepseek.usage`。description 一句话说做什么，参数与回执形状写在命令的 usage 里（agent 经 search 看到的就是这两项）；语义正本在随包 skill「deepseek」。
+改了命令名、参数或回执形状，出问题的是调用方，这类改动按破坏性版本处理。
 
-## 依赖的接口
+### ② 设置
 
-| 接口 | 用来做什么 | 生产实现 | 测试实现 |
-| --- | --- | --- | --- |
-| `gwbCommands` | 注册两条命令 | gwb-commands | 自搭替身（tests/plugin.test.ts） |
-| `gwbSettings` | 定义并读 api-key / model / base-url | gwb-settings | 自搭替身 |
-| `gwbData` | 记账文档读写 | gwb-data | 自搭替身 |
-| `gwbSkills`（局部注入） | 登记随包说明书 | gwb-skills | 自搭替身 |
+加载时定义三项：`api-key`（secret 型）、`model`、`base-url`。每次调用都现读，改了设置下一次调用就生效，不用重新加载插件。key 为空时直接回 `bad_key`、不发请求也不记账；`model` 与 `base-url` 为空时用 `deepseek-chat` 与官方地址，参数里给了 `model` 以参数为准。
 
-前三个服务在顶层 inject 里，缺哪个插件都不加载；skills 是局部注入，缺了命令照常可用：
+{/* ref file="../plugins/deepseek/src/index.ts" lines="116-121" hash="6ce8560dfe01" blob="52841a298e8f" */}
 
-{/* ref file="../plugins/deepseek/src/index.ts" lines="27-27" hash="078897cb07e9" blob="52841a298e8f" */}
+### ③ DeepSeek 开放平台
 
-## 怎么单独测
+一次调用就是一个 `POST {base-url}/chat/completions`，带 `authorization: Bearer <key>`；超时缺省 60 秒，参数可调到 110 秒为止（命令总线等一条命令最多 120 秒，留出余量）。发请求、读应答、把失败归成四类都在 `requestCompletion` 里，它只返回结果，不碰记账：
 
-纯逻辑全在 core.ts（参数收窄 / 请求组装 / 错误归类 / 应答解析 / 记账裁剪汇总），给输入、看输出，不碰网络；加载部分用自搭替身断言命令 / 设置 / 说明书的登记与 bad_key 直接返回；`deepseek.chat` 从发请求到写记账的整条路径把 `fetch` 换成替身测（`tests/chat-request.test.ts`）；真调一次的测试标为 slow（`DEEPSEEK_API_KEY` 环境变量给 key，`pnpm test:all` 才跑）。
+{/* ref file="../plugins/deepseek/src/index.ts" lines="82-108" hash="dfb84fe1ab7b" blob="52841a298e8f" */}
 
-{/* ref file="../plugins/deepseek/src/core.ts" hash="68c0e28ba880" blob="c43523d46e59" */}
+状态码怎么归类是这条接缝上最容易改错的地方：401 / 403 是 key 的问题，429 是限流，别的都算 `bad_response`；网络层的异常（DNS 解析失败、连接被拒）也归 `bad_response`，detail 里带原文。
 
-## 代码地图
+{/* ref file="../plugins/deepseek/src/core.ts" lines="112-121" hash="1715b0e8f90b" blob="c43523d46e59" */}
 
-**在哪**：`plugins/deepseek/`。**先读**：`src/core.ts`（纯逻辑，一个文件读完）→ `src/index.ts`（接线）。**读序**：index 依赖 core，core 不认识 cordis。**可跳过**：`dist/`（产物）、`skills/deepseek/SKILL.md`（随包发布的说明书，正文与命令的 description / usage 讲的是同一套参数）。
+### ④ 数据插件
+
+`deepseek.chat` 每次发出请求后，不论成败，都读出文档 `journal`、追加一条、写回；`deepseek.usage` 只读这一份，按天数过滤、按调用方汇总、按 token 数降序排。记账写不进去只写一条警告日志，**回执不变**——调用本身已经成功或失败，结果不能因为记账变：
+
+{/* ref file="../plugins/deepseek/src/index.ts" lines="48-56" hash="5a90ee1fd538" blob="52841a298e8f" */}
+
+文档名只能是 kebab-case：数据插件自己补 `.json` 后缀，名字里带点号会被直接拒绝（`journal.json` 这样的名字在真实 home 里失败过）。
+
+### ⑤ 磁盘上的记账文件
+
+数据插件把 `journal` 存成 `journal.json`。文件里是一个数组，每条的形状与条数上限由本插件定，文件放在哪、怎么读写由数据插件负责：
+
+{/* ref file="../plugins/deepseek/src/core.ts" lines="20-33" hash="63feb2dcab85" blob="c43523d46e59" */}
+
+本仓没有测试直接读这个文件，条目形状由 `core.test.ts`（裁剪与汇总）与 `chat-request.test.ts`（每种结果记下什么）覆盖。
+
+### ⑥ 说明书插件
+
+说明书只在局部注入里登记：说明书插件没装，两条命令照常可用，只是 agent 读不到说明书 `deepseek`。
+
+{/* has file="../plugins/deepseek/src/index.ts" text="ctx.inject(['gwbSkills'], (c) => {" */}
+
+## 对外能做什么
+
+| 能力 | 名字 | 说明 |
+| --- | --- | --- |
+| 命令 | `deepseek.chat` | 发一次调用，成功回正文、token 数、模型与调用方，失败回 `timeout` / `rate_limit` / `bad_key` / `bad_response` / `bad_args` |
+| 命令 | `deepseek.usage` | 按调用方汇总最近若干天的调用次数、成败与 token 数 |
+| 设置 | `api-key`、`model`、`base-url` | key 不随包发布、不进日志；日志里只有调用方、模型与 token 数，没有 prompt 与应答正文 |
+| 说明书 | `deepseek` | 给调用方看的用法：参数、四类错误各该怎么处理、怎么查账 |
+
+## 依赖
+
+命令总线、设置、数据三个插件写在顶层 `inject` 里，缺哪个本插件都不加载；说明书插件是局部注入，缺了只是没有说明书。peer 怎么写、每个依赖用来做什么，见[插件之间怎么连](/docs/wiring#godcreatorgwb-deepseek)。
+
+## 不做的事
+
+- **不带调用方策略**：不重试、不熔断、不缓存，降级全在调用方
+- **不认识调用方**：调用方是谁由参数 `caller` 给出（缺省 `adhoc`），插件不自己探测
+- **不看内容**：prompt 与应答正文不进日志，也不进记账
+- **没有界面**：没有窗格，查账用 `deepseek.usage`
+
+## 代码在哪
+
+`plugins/deepseek/`：先读 `src/core.ts`（纯函数，一个文件读完），再读 `src/index.ts`（接线与两条命令）。测试在 `tests/`：`core.test.ts` 测纯函数，`plugin.test.ts` 用自搭的替身测加载与登记，`chat-request.test.ts` 把 `fetch` 换成替身测 `deepseek.chat` 的整条路径，`real-call.test.ts` 真调一次 DeepSeek（打了 slow 标签，要环境变量 `DEEPSEEK_API_KEY`，`pnpm test:all` 才跑）。

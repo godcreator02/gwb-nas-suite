@@ -1,12 +1,12 @@
 # gwb-nas-suite
 
-**本页回答**：在这个仓干活的 agent 先看什么、怎么跑、门禁是哪几条、什么碰不得。
+**本页回答**：在这个仓干活的 agent 先看什么、怎么跑、提交前查什么、什么不能做。
 
 ## 先读
 
-`docs-site/content/docs/`：[系统地图](docs-site/content/docs/system-map.mdx) → 要改的那块的页 →
+`docs-site/content/docs/`：[入口页](docs-site/content/docs/index.mdx) → 要改的那个插件的首页 → [插件之间怎么连](docs-site/content/docs/wiring.mdx) →
 [术语表](docs-site/content/docs/glossary.mdx)。在途的实施方案在 `docs-site/content/future/spec/`，别的仓投来的反馈在 `docs-site/content/future/inbox/`。
-写文档读 skill「docfirst-docs」，记轨迹卡读 skill「trajectory」，写插件、在隔离 home 里验证读 skill「gwb-devkit」，
+写文档读 skill「docfirst-docs」与「docs-site」，记轨迹卡读 skill「trajectory」，写插件、在隔离 home 里验证读 skill「gwb-devkit」，
 升版本号、发版读 skill「gwb-release」。
 
 ## 怎么跑
@@ -17,18 +17,21 @@ pnpm build
 pnpm check
 ```
 
-## 门禁
+## 提交前
 
-提交前都要绿：
+都要通过：
 
 ```bash
 pnpm check
 cd docs-site && pnpm doc && pnpm build
 ```
 
-## 红线
+改了被文档钉住的代码，`pnpm doc` 会把本仓未提交改动引起的黄灯算红：先 `pnpm doc:confirm` 写回挪了位置的钉码，
+剩下的逐条复核，论断还成立就 `pnpm doc:confirm <页…> --accept`，和代码放进同一个提交。
 
-- 插件之间不 import：news-links 用 deepseek 只走命令总线，绝不 `import '@godcreator/gwb-deepseek'`
-- deepseek 插件是哑管道：不往里加重试 / 熔断 / 缓存 / 消费方策略，降级决策全在调用方
+## 不能做的
+
+- 插件之间不 import：news-links 用 deepseek 只经命令总线按名字调，不 `import '@godcreator/gwb-deepseek'`
+- deepseek 插件是哑管道：不往里加重试、熔断、缓存这类调用方策略，降级由调用方决定
 - NAS 侧的 compose 与脚本改动去 ugreen-nas-config（单元 26091409bfn）做，这个仓只有消费端
-- 这份 AGENTS.md 是生成物，正本是 `docs-site/content/docs/outputs/agents.mdx`，改那边
+- 这份 AGENTS.md、CLAUDE.md、README.md 与 `plugins/deepseek/skills/deepseek/SKILL.md` 都是生成物，正本在 `docs-site/content/docs/outputs/`，改正本后运行 `pnpm doc:render`

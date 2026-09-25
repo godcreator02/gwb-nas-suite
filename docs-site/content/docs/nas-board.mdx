@@ -1,0 +1,29 @@
+---
+title: nas-board 插件
+description: NAS 体检看板。此刻还是 devkit 模板的形状（一个窗格、一条 ping 命令）；要做成读 NAS 每日定案 JSON 画状态的看板，设计在未来区
+---
+
+**本页回答**：nas-board 此刻能做什么、接口是什么、依赖谁、明确不做什么；要做成的样子在哪。
+
+## 此刻是什么
+
+`@godcreator/gwb-nas-board` 还是 devkit 建仓模板的形状：一个标题为「NAS 体检看板」的窗格，里面是模板自带的计数按钮；一条 `nas-board.ping`，回插件名与当前时刻，只用来确认插件加载上了。要做成的看板——经 SMB 只读拉 NAS 每天归档的定案 JSON、画今日结论与近 30 天可用性、新鲜度看门狗、一键复制询问——设计与验收清单在 [nas-board 的实施方案](/future/spec/nas-board)。
+
+{/* has file="../plugins/nas-board/src/index.ts" text="name: 'nas-board.ping'" */}
+
+{/* has file="../plugins/nas-board/src/index.ts" text="shell.registerPane({ id: 'main', title: 'NAS 体检看板'" */}
+
+这一版只有 node 侧加载、浏览器侧窗格这一条最小的链路，和别的插件、磁盘、外部服务都还没有接缝，所以没有画接缝图。
+
+## 依赖
+
+命令总线（登记 `nas-board.ping`）与外壳（注册窗格、提供主题令牌）都是必需注入，缺哪个插件都不加载。peer 写法见[插件之间怎么连](/docs/wiring#godcreatorgwb-nas-board)。
+
+## 不做的事
+
+- **判定不重算、不接模型**：看板只呈现 NAS 侧归档的判定与结论原值，判定要确定、可复现，由 NAS 侧的阈值模板完成
+- **不推送、不做实时告警**：离开桌面时的告警归将来的手机告警端，看板只在打开时呈现
+- **不在 NAS 上渲染**：不建静态站、不开子域名，视图每次在工作台里从 JSON 重新画
+- **不生产数据**：采集、判定、归档与 NAS 上的部署都在 ugreen-nas-config（单元 26091409bfn），本仓只消费定案 JSON
+
+这些边界是怎么定下来的，见轨迹卡[弃推转拉](/trajectory/2026-09-20-pivot-to-gwb-consumption)。

@@ -1,0 +1,29 @@
+---
+title: news-links 插件
+description: 资讯精选阅读器。此刻还是 devkit 模板的形状（一个窗格、一条 ping 命令）；要做成从 FreshRSS 与邮件增量里挑链接的阅读器，设计在未来区
+---
+
+**本页回答**：news-links 此刻能做什么、接口是什么、依赖谁、明确不做什么；要做成的样子在哪。
+
+## 此刻是什么
+
+`@godcreator/gwb-news-links` 还是 devkit 建仓模板的形状：一个标题为「资讯精选阅读器」的窗格，里面是模板自带的计数按钮；一条 `news-links.ping`，回插件名与当前时刻，只用来确认插件加载上了。要做成的阅读器——从 FreshRSS 与 mail-archiver 取增量、按水位去重、经 `deepseek.chat` 精选、在窗格里列出链接——设计与验收清单在 [news-links 的实施方案](/future/spec/news-links)。
+
+{/* has file="../plugins/news-links/src/index.ts" text="name: 'news-links.ping'" */}
+
+{/* has file="../plugins/news-links/src/index.ts" text="shell.registerPane({ id: 'main', title: '资讯精选阅读器'" */}
+
+这一版只有 node 侧加载、浏览器侧窗格这一条最小的链路，和 deepseek、外部服务都还没有接缝，所以没有画接缝图。
+
+## 依赖
+
+命令总线（登记 `news-links.ping`）与外壳（注册窗格、提供主题令牌）都是必需注入，缺哪个插件都不加载。peer 写法见[插件之间怎么连](/docs/wiring#godcreatorgwb-news-links)。以后调 deepseek 只按命令名 `deepseek.chat` 经命令总线调，不写 peer。
+
+## 不做的事
+
+- **不搬运正文**：精选只出「选哪些、各一句理由」，正文永远在来源那里，列表里是直达的链接
+- **不在 NAS 上新部署**：FreshRSS 与 mail-archiver 是 NAS 上已有的服务，插件从 PC 直接调它们的 API
+- **不存模型的 key**：key 只在 deepseek 插件里；deepseek 不重试，模型失败后退回规则精选的降级在本插件里做
+- **不 import deepseek**：两个插件之间只经命令总线按名字调用
+
+这些边界是怎么定下来的，见轨迹卡[弃推转拉](/trajectory/2026-09-20-pivot-to-gwb-consumption)。

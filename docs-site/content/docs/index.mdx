@@ -1,24 +1,39 @@
 ---
 title: gwb-nas-suite
-description: NAS 监控与资讯消费的三个插件所在的仓——是什么、边界在哪、从哪页开始读
+description: NAS 监控与资讯消费的三个 gwb 插件所在的仓——各是什么、做到哪一步、边界在哪、从哪页读起
 ---
 
-# gwb-nas-suite
+**本页回答**：`gwb-nas-suite` 是什么、为什么存在、三个插件各做到哪一步、从哪一页读起。
 
-**本页回答**：`gwb-nas-suite` 是什么、边界在哪、从哪一页开始读。
+这个仓是绿联 NAS 监控与日常资讯的**消费端**：数据在 NAS 上生产，查看、挑选、调模型都在桌面工作台里做。NAS 侧的采集、判定、归档与部署在 ugreen-nas-config（单元 26091409bfn），两边之间的契约是 NAS 每天归档的定案 JSON，以及 NAS 上已有的 FreshRSS、mail-archiver 两个服务的 API。为什么从「NAS 推送到手机」改成「桌面上拉取」，见轨迹卡[弃推转拉](/trajectory/2026-09-20-pivot-to-gwb-consumption)。
 
-## 是什么
+## 三个插件
 
-这是 NAS 监控与资讯消费的 gwb 插件仓：仓根只是 workspace 根目录，三个插件在 `plugins/`——`deepseek`（模型命令管道）、`nas-board`（NAS 体检看板）、`news-links`（资讯精选阅读器）。NAS 侧的数据生产与部署在 ugreen-nas-config（单元 26091409bfn），这个仓只有消费端；两边的契约是 NAS 每日归档的定案 JSON 与 FreshRSS / mail-archiver 的既有 API。
+| 插件 | 做什么 | 做到哪一步 | 首页 |
+| --- | --- | --- | --- |
+| `plugins/deepseek/` | 全工作台共用的 DeepSeek 调用入口：原样转发、四类错误、每次记账 | 已实现 | [deepseek 插件](/docs/deepseek) |
+| `plugins/nas-board/` | NAS 体检看板：拉定案 JSON、画今日结论与近 30 天可用性 | 还是模板形状，设计在未来区 | [nas-board 插件](/docs/nas-board) |
+| `plugins/news-links/` | 资讯精选阅读器：取 RSS 与邮件增量、经 `deepseek.chat` 挑链接 | 还是模板形状，设计在未来区 | [news-links 插件](/docs/news-links) |
 
-deepseek 已经实现；news-links 与 nas-board 还是 devkit 模板的形状，设计与验收清单在未来区的实施方案页（[nas-board](/future/spec/nas-board)、[news-links](/future/spec/news-links)）。往哪儿去见 [未来](/future/overview)。
+仓根是不发布的 pnpm workspace，一个插件一个包，配置都在包内：`build.ts` 用 esbuild 打 node 侧与浏览器侧，Tailwind 出样式（deepseek 没有窗格，只有 node 侧）。文档站 `docs-site/` 自己一套依赖，不在 workspace 里。
+
+{/* tree dir="../plugins" depth="2" hash="17eb99e57064" */}
+
+三个插件之间此刻没有调用关系；以后唯一的一条是 news-links 经命令总线按名字调 `deepseek.chat`，不 import、不写 peer。各插件注入了哪些服务、peer 怎么写，见[插件之间怎么连](/docs/wiring)。
 
 ## 按来意怎么读
 
 | 来意 | 先读 |
 | --- | --- |
-| 看三个插件怎么分、谁依赖谁 | [系统地图](/docs/system-map) |
-| 要改 deepseek | [deepseek 插件](/docs/deepseek) |
-| 要做 news-links 或 nas-board | 未来区的实施方案：[nas-board](/future/spec/nas-board)、[news-links](/future/spec/news-links) |
+| 要改 deepseek、或要在别处调模型 | [deepseek 插件](/docs/deepseek)，调用方的用法在说明书 [deepseek](/docs/outputs/skills/deepseek) |
+| 要做 nas-board 或 news-links | 插件首页的「不做的事」，再读未来区的实施方案：[nas-board](/future/spec/nas-board)、[news-links](/future/spec/news-links) |
+| 改依赖、加注入 | [插件之间怎么连](/docs/wiring) |
 | 碰到不认识的词 | [术语表](/docs/glossary) |
+| 想知道这个仓往哪儿去 | [未来](/future/overview) |
 | 想知道为什么是现在这样 | [轨迹](/trajectory) |
+
+## 整个仓不做的事
+
+- **不做 NAS 侧**：compose、脚本、采集与判定都在 ugreen-nas-config，这个仓只有消费端
+- **不做推送**：微信推送已退役，「异常日才推」的代码留在 ugreen-nas-config，要恢复在那边做；离开桌面时的告警归将来的手机告警端
+- **只服务机主一人**：不做多用户、不做多台机器之间的同步

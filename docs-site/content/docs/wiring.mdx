@@ -1,0 +1,87 @@
+---
+title: 插件之间怎么连
+description: 三个插件各提供什么、注入了哪些服务、peer 怎么写、缺了会怎样；插件之间此刻没有调用关系
+---
+
+**本页回答**：本仓插件提供哪些服务、命令与事件；注入了哪些服务、是必需还是局部注入、peer 怎么写；按名字调用了别的插件的哪些命令、用了哪些约定通道。
+
+三个插件之间此刻没有任何调用：news-links 以后经命令总线按名字调 `deepseek.chat`（设计在 [news-links 的实施方案](/future/spec/news-links)），那时只按命令名调、不 import、不写 peer。三个包的 peer 里都有内核包 `@godcreator/gwb-kernel-desktop`，用来声明兼容哪些内核、取 `GwbContext` 这类接口类型，下面的表不再逐个列它。
+
+## @godcreator/gwb-deepseek
+
+### 提供
+
+| 类别 | 名字 | 说明 |
+| --- | --- | --- |
+| 命令 | `deepseek.chat` | 原样转发一次 DeepSeek 调用，四类结构化错误，每次记账 |
+| 命令 | `deepseek.usage` | 按调用方汇总记账 |
+| 设置 | `api-key`、`model`、`base-url` | key 是 secret 型 |
+| 说明书 | `deepseek` | 随包发布在 `skills/deepseek/` |
+
+### 注入
+
+| 服务 | 提供方包 | 必需 / 局部注入 | peer 写法 | 用来做什么 | 缺了会怎样 |
+| --- | --- | --- | --- | --- | --- |
+| `gwbCommands` | `@godcreator/gwb-commands` | 必需 | `^0.5.2` | 登记两条命令 | 插件不加载 |
+| `gwbSettings` | `@godcreator/gwb-settings` | 必需 | `^0.3.5` | 定义并读三项设置 | 插件不加载 |
+| `gwbData` | `@godcreator/gwb-data` | 必需 | `^0.1.9` | 读写记账文档 `journal` | 插件不加载 |
+| `gwbSkills` | `@godcreator/gwb-skills` | 局部注入 | `^0.4.7`，`optional: true` | 登记说明书 `deepseek` | 命令照常可用，agent 读不到说明书 |
+
+{/* has file="../plugins/deepseek/src/index.ts" text="export const inject = ['gwbCommands', 'gwbSettings', 'gwbData']" */}
+
+{/* has file="../plugins/deepseek/src/index.ts" text="ctx.inject(['gwbSkills']" */}
+
+{/* has file="../plugins/deepseek/package.json" text="&quot;@godcreator/gwb-skills&quot;: { &quot;optional&quot;: true }" */}
+
+### 按名字调用与约定通道
+
+| 通道 | 对方 | 名字 | 用来做什么 |
+| --- | --- | --- | --- |
+| 网络 | DeepSeek 开放平台 | `POST {base-url}/chat/completions` | 真正的模型调用 |
+| 数据插件的文档 | 数据插件 | `journal`（磁盘上是 `journal.json`） | 记账 |
+
+{/* has file="../plugins/deepseek/src/index.ts" text="const JOURNAL_DOC_NAME = 'journal'" */}
+
+## @godcreator/gwb-nas-board
+
+### 提供
+
+| 类别 | 名字 | 说明 |
+| --- | --- | --- |
+| 命令 | `nas-board.ping` | 模板自带，回插件名与当前时刻 |
+| 窗格 | `main`（标题「NAS 体检看板」） | 模板窗格 |
+
+### 注入
+
+| 服务 | 提供方包 | 必需 / 局部注入 | peer 写法 | 用来做什么 | 缺了会怎样 |
+| --- | --- | --- | --- | --- | --- |
+| `gwbCommands` | `@godcreator/gwb-commands` | 必需 | `^0.5.2` | 登记 `nas-board.ping` | 插件不加载 |
+| `gwbShell` | `@godcreator/gwb-shell` | 必需 | `^0.14.1` | 注册窗格；样式取外壳的主题令牌 | 插件不加载 |
+
+{/* has file="../plugins/nas-board/src/index.ts" text="export const inject = ['gwbCommands', 'gwbShell']" */}
+
+### 按名字调用与约定通道
+
+没有。
+
+## @godcreator/gwb-news-links
+
+### 提供
+
+| 类别 | 名字 | 说明 |
+| --- | --- | --- |
+| 命令 | `news-links.ping` | 模板自带，回插件名与当前时刻 |
+| 窗格 | `main`（标题「资讯精选阅读器」） | 模板窗格 |
+
+### 注入
+
+| 服务 | 提供方包 | 必需 / 局部注入 | peer 写法 | 用来做什么 | 缺了会怎样 |
+| --- | --- | --- | --- | --- | --- |
+| `gwbCommands` | `@godcreator/gwb-commands` | 必需 | `^0.5.2` | 登记 `news-links.ping` | 插件不加载 |
+| `gwbShell` | `@godcreator/gwb-shell` | 必需 | `^0.14.1` | 注册窗格；样式取外壳的主题令牌 | 插件不加载 |
+
+{/* has file="../plugins/news-links/src/index.ts" text="export const inject = ['gwbCommands', 'gwbShell']" */}
+
+### 按名字调用与约定通道
+
+没有。

@@ -24,5 +24,8 @@ export default {
   },
   components: {
     ...fumadocs.defaultRoster,
+    // 接缝图在机读版里只剩一句说明；每条接缝的契约都在正文里按编号写出
+    DeepseekSeams: (node, h) =>
+      h.paragraph('[接缝图] deepseek 插件与命令总线、设置、数据、说明书四个插件以及 DeepSeek 开放平台、磁盘上的记账文件之间的六条接缝，正文按编号逐条讲'),
   },
 }

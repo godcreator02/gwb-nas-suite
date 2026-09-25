@@ -1,16 +1,14 @@
 ---
 title: 术语表
-description: 这个仓里的词各指什么、正本在哪
+description: 这个仓里反复出现的词各指什么、讲它的那页在哪
 ---
 
-# 术语表
+**本页回答**：这个仓里反复出现的词各指什么，一个词一行，最后一列指向讲它的那一页。
 
-**本页回答**：这个仓里反复出现的词各指什么，一个词一行，正本（定义它的那处代码或那一页）指过去。
-
-| 术语 | 一句话 | 正本在哪 |
+| 术语 | 一句话 | 讲它的页 |
 | --- | --- | --- |
 | 哑管道 | 只把请求原样发出、原样返回的插件，不带重试、熔断、缓存这类调用方策略，降级由调用方决定 | [deepseek 插件](/docs/deepseek) |
-| 记账 | deepseek 插件给每次调用留一条记录（时刻、调用方、模型、成败、token 数），可按调用方汇总 | [deepseek 插件](/docs/deepseek) |
-| 定案 JSON | NAS 每天判定完归档的体检结论文件，是 nas-board 与 NAS 侧之间的契约；生产方在 ugreen-nas-config | [nas-board](/future/spec/nas-board) |
-| 水位 | news-links 为每个来源记下已处理到的最大 id，下一轮只取比它新的条目 | [news-links](/future/spec/news-links) |
-| 精选 | news-links 让模型从一轮条目里挑出值得看的链接、各附一句理由，只选不改写正文 | [news-links](/future/spec/news-links) |
+| 记账 | deepseek 插件给每次发出去的调用留一条记录（时刻、调用方、模型、成败、token 数），可按调用方汇总 | [deepseek 插件](/docs/deepseek) |
+| 定案 JSON | NAS 每天判定完归档的体检结论文件，是 nas-board 与 NAS 侧之间的契约；生产方在 ugreen-nas-config | [nas-board 的实施方案](/future/spec/nas-board) |
+| 水位 | news-links 为每个来源记下已处理到的最大 id，下一轮只取比它新的条目 | [news-links 的实施方案](/future/spec/news-links) |
+| 精选 | news-links 让模型从一轮条目里挑出值得看的链接、各附一句理由，只选不改写正文 | [news-links 的实施方案](/future/spec/news-links) |

@@ -5,9 +5,9 @@
   "type": "module",
   "description": "gwb-nas-suite 的文档站：现状钉在这个仓的源码上，README / AGENTS / CLAUDE 与 deepseek 的说明书由 docfirst render 生成",
   "scripts": {
-    "dev": "next dev -p 4327",
+    "dev": "next dev -H 127.0.0.1 -p 4327",
     "build": "next build",
-    "start": "next start -p 4327",
+    "start": "next start -H 127.0.0.1 -p 4327",
     "docfirst": "docfirst",
     "doc": "docfirst check",
     "doc:confirm": "docfirst confirm",

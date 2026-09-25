@@ -1,32 +1,33 @@
 ---
 title: README
-description: 仓根 README.md 的正本——render 生成到仓根
+description: 仓根 README.md 的正本——pnpm doc:render 生成到仓根
 ---
 
 # gwb-nas-suite
 
-**本页回答**：`gwb-nas-suite` 是什么、怎么装、怎么用、文档在哪。
+**本页回答**：`gwb-nas-suite` 是什么、怎么装、怎么确认装好了、文档在哪。
 
 ## 是什么
 
-NAS 监控与资讯消费的 gwb 插件仓（仓根只是 workspace 根目录，三个插件在 `plugins/`）：
+绿联 NAS 监控与日常资讯的 gwb 插件仓（仓根是 pnpm workspace，三个插件在 `plugins/`）：
 
-| 插件 | 包名 | 干什么 |
+| 插件 | 包名 | 做什么 |
 | --- | --- | --- |
-| deepseek | `@godcreator/gwb-deepseek` | DeepSeek 命令管道——一条 `deepseek.chat` 给整个工作台用，API key 只存在这个插件的设置里，每次调用都记账 |
-| news-links | `@godcreator/gwb-news-links` | 资讯精选阅读器——FreshRSS 与邮件的增量，DeepSeek 挑链接，打开时拉取 |
-| nas-board | `@godcreator/gwb-nas-board` | NAS 体检看板——经 SMB 拉绿联 NAS 每日的定案 JSON，在 gwb 窗格里画 |
+| deepseek | `@godcreator/gwb-deepseek` | 整个工作台共用的 DeepSeek 调用入口：一条 `deepseek.chat`，API key 只存在这个插件的设置里，每次调用都记账 |
+| news-links | `@godcreator/gwb-news-links` | 资讯精选阅读器：取 FreshRSS 与邮件的增量，经 DeepSeek 挑出值得看的链接 |
+| nas-board | `@godcreator/gwb-nas-board` | NAS 体检看板：经 SMB 拉绿联 NAS 每天的定案 JSON，在工作台的窗格里画出来 |
 
-NAS 侧数据生产与部署在 ugreen-nas-config（单元 26091409bfn）。deepseek 已实现，news-links 与 nas-board 还在做，
-设计与验收清单见文档站未来区的实施方案（`docs-site/content/future/spec/`）。
+NAS 侧的数据生产与部署在 ugreen-nas-config（单元 26091409bfn）。deepseek 已实现；news-links 与 nas-board 还是 devkit 模板的形状，
+设计与验收清单在文档站未来区的实施方案（`docs-site/content/future/spec/`）。
 
 ## 怎么装
 
-逐个装进 home：`plugin-manager.install {"pkg":"<上表包名>"}`。
+逐个装进 home：`plugin-manager.install {"pkg":"<上表包名>"}`。安装不会顺带装 peer：deepseek 要 home 里有命令总线、设置、数据三个插件，
+news-links 与 nas-board 要有命令总线与外壳；缺的在 `plugin-manager.list` 的 `unmetPeers` 里看得到。
 
-## 怎么确认在干活
+## 怎么确认装好了
 
-deepseek 插件装上后 `deepseek.chat {prompt:"…"}` 有回执；news-links / nas-board 的验收见各自 spec 页。
+`plugin-manager.list` 里三个包的条目都在运行；`deepseek.usage` 回汇总（不花钱，不发请求），`nas-board.ping`、`news-links.ping` 回插件名与时刻。
 
 ## 文档
 
