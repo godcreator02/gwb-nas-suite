@@ -66,7 +66,7 @@ export function parseChatArgs(args: unknown): Parsed<ChatArgs> {
   let caller = 'adhoc'
   if (callerGiven !== undefined) {
     if (typeof callerGiven !== 'string' || callerGiven.trim() === '') {
-      return { ok: false, error: 'caller 要是非空字符串——自报家门进记账' }
+      return { ok: false, error: 'caller 要是非空字符串：写明调用方，记进账里' }
     }
     caller = callerGiven.trim().slice(0, 64)
   }
