@@ -5,35 +5,33 @@
   "description": "DeepSeek 命令插件：deepseek.chat 把模型调用原样发给 DeepSeek 并原样带回结果，deepseek.usage 按调用方汇总 token 用量；key、模型与 API 地址存在设置里。",
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./package.json": "./package.json"
+    ".": "./dist/index.js"
   },
-  "files": ["dist", "src", "skills"],
-  "gwb": {
-    "title": "DeepSeek 命令插件"
-  },
-  "keywords": ["gwb", "gwb-plugin"],
+  "files": ["dist", "skills"],
+  "keywords": ["gwb-plugin"],
+  "publishConfig": { "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/" },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "node build.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "oxlint . --deny-warnings",
     "test": "vitest run --passWithNoTests --tags-filter=!slow",
     "test:all": "vitest run --passWithNoTests",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
-    "prepublishOnly": "pnpm build"
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test"
   },
-  "engines": { "node": ">=24" },
   "peerDependencies": {
-    "@godcreator/gwb-kernel-desktop": "^0.4.1"
+    "@godcreator/gwb-kernel-desktop": "^0.7.2",
+    "@godcreator/gwb-commands": "^0.5.2",
+    "@godcreator/gwb-data": "^0.1.9",
+    "@godcreator/gwb-settings": "^0.3.5",
+    "@godcreator/gwb-skills": "^0.4.7"
+  },
+  "peerDependenciesMeta": {
+    "@godcreator/gwb-skills": { "optional": true }
   },
   "devDependencies": {
-    "@godcreator/gwb-commands": "^0.4.6",
-    "@godcreator/gwb-data": "^0.1.6",
-    "@godcreator/gwb-plugin-api": "^0.4.1",
-    "@godcreator/gwb-settings": "^0.3.2",
-    "@godcreator/gwb-skills": "^0.4.4",
     "@types/node": "^24.0.0",
     "cordis": "4.0.0-rc.10",
+    "esbuild": "^0.28.2",
     "oxlint": "1.76.0",
     "oxlint-tsgolint": "7.0.2001",
     "typescript": "^7.0.2",

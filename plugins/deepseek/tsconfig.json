@@ -7,9 +7,9 @@
     "types": ["node"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src/index.ts", "tests/**/*.ts"]
+  "include": ["src/index.ts", "build.ts", "tests/**/*.ts"]
 }

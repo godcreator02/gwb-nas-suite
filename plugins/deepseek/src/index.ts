@@ -1,4 +1,4 @@
-import type { GwbContext } from '@godcreator/gwb-plugin-api'
+import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 只为激活这几个插件的 `declare module 'cordis'`——它们给 ctx 加上 gwbCommands / gwbSettings / gwbData / gwbSkills
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-settings'
@@ -68,8 +68,8 @@ export function apply(ctx: GwbContext): void {
   const commands = ctx.gwbCommands
   const settings = ctx.gwbSettings
   const data = ctx.gwbData
-  // inject 保证了它们在，这几句只是把类型收窄
-  if (commands === undefined || settings === undefined || data === undefined) return
+  // 命令总线在类型上是可选的（内核也声明了它）；inject 保证了它在，不在就是加载顺序出了错，直接报
+  if (commands === undefined) throw new Error('ctx.gwbCommands 不在：inject 里写了它，cordis 本不该调用 apply')
   log.info('DeepSeek 命令插件已加载')
 
   // 说明书：一份说明书一个子目录（skills/deepseek/）。局部注入——说明书插件没装，命令照常可用
@@ -99,95 +99,91 @@ export function apply(ctx: GwbContext): void {
     default: DEFAULT_BASE_URL,
   })
 
-  // 命令：register 返回注销函数，放进 ctx.effect——插件条目停用时命令名也跟着注销（2026-09-09 遇到过）
-  ctx.effect(() =>
-    commands.register(
-      {
-        name: 'deepseek.chat',
-        description:
-          '把一次 DeepSeek 调用原样发出去、把结果原样带回。哑管道：不重试不缓存，降级策略在调用方；caller 写明调用方、进记账。见 skill「deepseek」',
-        usage:
-          '{ prompt 必给（非空字符串）, system?, jsonMode?（布尔；DeepSeek 要求 prompt 里出现 json 字样）, timeoutMs?（正数毫秒，缺省 60000，超过 110000 按 110000）, caller?（非空字符串，截到 64 字，缺省 adhoc）, model?（非空字符串，缺省取设置 model）}。' +
-          '成功回 { ok: true, data: { text, usage: { promptTokens, completionTokens, totalTokens }, model, caller } }；' +
-          '失败回 { ok: false, error: "timeout" | "rate_limit" | "bad_key" | "bad_response" | "bad_args"（参数不合法）, detail }',
-        plugin: PKG,
-      },
-      async (args: unknown) => {
-        const parsed = parseChatArgs(args)
-        if (!parsed.ok) return { ok: false as const, error: 'bad_args' as const, detail: parsed.error }
-        const a = parsed.value
+  // 命令总线继承 cordis 的 Service：本插件卸载时，命令自动注销
+  commands.register(
+    {
+      name: 'deepseek.chat',
+      description:
+        '把一次 DeepSeek 调用原样发出去、把结果原样带回。哑管道：不重试不缓存，降级策略在调用方；caller 写明调用方、进记账。见 skill「deepseek」',
+      usage:
+        '{ prompt 必给（非空字符串）, system?, jsonMode?（布尔；DeepSeek 要求 prompt 里出现 json 字样）, timeoutMs?（正数毫秒，缺省 60000，超过 110000 按 110000）, caller?（非空字符串，截到 64 字，缺省 adhoc）, model?（非空字符串，缺省取设置 model）}。' +
+        '成功回 { ok: true, data: { text, usage: { promptTokens, completionTokens, totalTokens }, model, caller } }；' +
+        '失败回 { ok: false, error: "timeout" | "rate_limit" | "bad_key" | "bad_response" | "bad_args"（参数不合法）, detail }',
+      plugin: PKG,
+    },
+    async (args: unknown) => {
+      const parsed = parseChatArgs(args)
+      if (!parsed.ok) return { ok: false as const, error: 'bad_args' as const, detail: parsed.error }
+      const a = parsed.value
 
-        const key = asString(settings.get(API_KEY))
-        if (key === '') {
-          return { ok: false as const, error: 'bad_key' as const, detail: 'deepseek 的 api-key 没配——到「设置」里填上再调' }
-        }
-        const model = a.model ?? (asString(settings.get(MODEL)) || DEFAULT_MODEL)
-        const baseUrl = asString(settings.get(BASE_URL)) || DEFAULT_BASE_URL
+      const key = asString(settings.get(API_KEY))
+      if (key === '') {
+        return { ok: false as const, error: 'bad_key' as const, detail: 'deepseek 的 api-key 没配——到「设置」里填上再调' }
+      }
+      const model = a.model ?? (asString(settings.get(MODEL)) || DEFAULT_MODEL)
+      const baseUrl = asString(settings.get(BASE_URL)) || DEFAULT_BASE_URL
 
-        const entry: JournalEntry = { at: new Date().toISOString(), caller: a.caller, model, ok: false }
-        try {
-          const res = await fetch(`${baseUrl.replace(/\/+$/, '')}/chat/completions`, {
-            method: 'POST',
-            headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-            body: JSON.stringify(buildBody(a, model)),
-            signal: AbortSignal.timeout(a.timeoutMs ?? DEFAULT_TIMEOUT_MS),
-          })
-          const text = await res.text()
-          if (!res.ok) {
-            const c = classifyStatus(res.status, text)
-            entry.error = c.kind
-            await record(data, (m) => log.warn(m), entry)
-            return { ok: false as const, error: c.kind, detail: c.detail }
-          }
-          let payload: unknown
-          try {
-            payload = JSON.parse(text)
-          } catch {
-            entry.error = 'bad_response'
-            await record(data, (m) => log.warn(m), entry)
-            return { ok: false as const, error: 'bad_response' as const, detail: `应答不是 JSON：${text.slice(0, 300)}` }
-          }
-          const completion = parseCompletion(payload)
-          if (!completion.ok) {
-            entry.error = 'bad_response'
-            await record(data, (m) => log.warn(m), entry)
-            return { ok: false as const, error: 'bad_response' as const, detail: completion.error }
-          }
-          entry.ok = true
-          entry.usage = completion.value.usage
-          await record(data, (m) => log.warn(m), entry)
-          log.info(
-            `${a.caller} → ${model} tokens=${completion.value.usage.totalTokens}${a.jsonMode === true ? '（json）' : ''}`,
-          )
-          return {
-            ok: true as const,
-            data: { text: completion.value.text, usage: completion.value.usage, model, caller: a.caller },
-          }
-        } catch (err) {
-          const c = classifyException(err)
+      const entry: JournalEntry = { at: new Date().toISOString(), caller: a.caller, model, ok: false }
+      try {
+        const res = await fetch(`${baseUrl.replace(/\/+$/, '')}/chat/completions`, {
+          method: 'POST',
+          headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+          body: JSON.stringify(buildBody(a, model)),
+          signal: AbortSignal.timeout(a.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+        })
+        const text = await res.text()
+        if (!res.ok) {
+          const c = classifyStatus(res.status, text)
           entry.error = c.kind
           await record(data, (m) => log.warn(m), entry)
           return { ok: false as const, error: c.kind, detail: c.detail }
         }
-      },
-    ),
+        let payload: unknown
+        try {
+          payload = JSON.parse(text)
+        } catch {
+          entry.error = 'bad_response'
+          await record(data, (m) => log.warn(m), entry)
+          return { ok: false as const, error: 'bad_response' as const, detail: `应答不是 JSON：${text.slice(0, 300)}` }
+        }
+        const completion = parseCompletion(payload)
+        if (!completion.ok) {
+          entry.error = 'bad_response'
+          await record(data, (m) => log.warn(m), entry)
+          return { ok: false as const, error: 'bad_response' as const, detail: completion.error }
+        }
+        entry.ok = true
+        entry.usage = completion.value.usage
+        await record(data, (m) => log.warn(m), entry)
+        log.info(
+          `${a.caller} → ${model} tokens=${completion.value.usage.totalTokens}${a.jsonMode === true ? '（json）' : ''}`,
+        )
+        return {
+          ok: true as const,
+          data: { text: completion.value.text, usage: completion.value.usage, model, caller: a.caller },
+        }
+      } catch (err) {
+        const c = classifyException(err)
+        entry.error = c.kind
+        await record(data, (m) => log.warn(m), entry)
+        return { ok: false as const, error: c.kind, detail: c.detail }
+      }
+    },
   )
 
-  ctx.effect(() =>
-    commands.register(
-      {
-        name: 'deepseek.usage',
-        description: '按调用方汇总 DeepSeek 调用的记账：调用次数、成功与失败数、token 总数',
-        usage:
-          '{ days?（正整数，缺省 30，上限 3650；不是正整数按 30）}，不给参数也行。' +
-          '回 { ok: true, data: { days, byCaller: [{ caller, calls, ok, failed, totalTokens }]（按 totalTokens 降序）, total: { caller: "全部", calls, ok, failed, totalTokens } } }',
-        plugin: PKG,
-      },
-      async (args: unknown) => {
-        const days = parseUsageArgs(args)
-        const entries = await data.readDoc(JOURNAL_DOC)
-        return { ok: true as const, data: { days, ...aggregateUsage(entries, days) } }
-      },
-    ),
+  commands.register(
+    {
+      name: 'deepseek.usage',
+      description: '按调用方汇总 DeepSeek 调用的记账：调用次数、成功与失败数、token 总数',
+      usage:
+        '{ days?（正整数，缺省 30，上限 3650；不是正整数按 30）}，不给参数也行。' +
+        '回 { ok: true, data: { days, byCaller: [{ caller, calls, ok, failed, totalTokens }]（按 totalTokens 降序）, total: { caller: "全部", calls, ok, failed, totalTokens } } }',
+      plugin: PKG,
+    },
+    async (args: unknown) => {
+      const days = parseUsageArgs(args)
+      const entries = await data.readDoc(JOURNAL_DOC)
+      return { ok: true as const, data: { days, ...aggregateUsage(entries, days) } }
+    },
   )
 }

@@ -1,4 +1,4 @@
-import type { GwbContext } from '@godcreator/gwb-plugin-api'
+import type { GwbContext } from '@godcreator/gwb-kernel-desktop'
 // 空的类型 import 只为让两个包的 `declare module 'cordis'` 生效，ctx 上才有 gwbCommands / gwbShell 的类型
 import type {} from '@godcreator/gwb-commands'
 import type {} from '@godcreator/gwb-shell'
@@ -21,26 +21,23 @@ export function apply(ctx: GwbContext): void {
   const log = ctx.logger(name)
   const shell = ctx.gwbShell
   const commands = ctx.gwbCommands
-  // inject 已保证两个服务都在，这一行只为把可选类型收窄
-  if (shell === undefined || commands === undefined) return
+  // 命令总线在类型上是可选的（内核也声明了它）；inject 保证了它在，不在就是加载顺序出了错，直接报
+  if (commands === undefined) throw new Error('ctx.gwbCommands 不在：inject 里写了它，cordis 本不该调用 apply')
   log.info('资讯精选阅读器已加载')
 
   // 外壳继承 cordis 的 Service：本插件卸载时，窗格自动注销。
   // 地址按 import.meta.url 算，内核不认识任何包名
   shell.registerPane({ id: 'main', title: '资讯精选阅读器', client: CLIENT_URL, style: STYLE_URL })
 
-  // 命令是插件向页面和 agent 提供能力的方式。register 返回注销函数，包进 ctx.effect，本插件卸载时注销：
-  // 命令总线 0.4.6 起自己会这么做，更早的版本不包就会在卸载后把命令名留在命令表里
-  ctx.effect(() =>
-    commands.register(
-      {
-        name: 'news-links.ping',
-        // description 一句话说命令做什么（MCP 入口的 index 列它），参数形状写进 usage（search 列它），无参数写「无参数」
-        description: '模板自带的命令：返回插件名与当前时间，用来确认插件已加载',
-        usage: '无参数。返回 { plugin, time }：插件名与 ISO 时刻',
-        plugin: '@godcreator/gwb-news-links',
-      },
-      async () => ({ ok: true, data: { plugin: name, time: new Date().toISOString() } }),
-    ),
+  // 命令是插件向页面和 agent 提供能力的方式。命令总线继承 cordis 的 Service：本插件卸载时，命令自动注销
+  commands.register(
+    {
+      name: 'news-links.ping',
+      // description 一句话说命令做什么（MCP 入口的 index 列它），参数形状写进 usage（search 列它），无参数写「无参数」
+      description: '模板自带的命令：返回插件名与当前时间，用来确认插件已加载',
+      usage: '无参数。返回 { plugin, time }：插件名与 ISO 时刻',
+      plugin: '@godcreator/gwb-news-links',
+    },
+    async () => ({ ok: true, data: { plugin: name, time: new Date().toISOString() } }),
   )
 }

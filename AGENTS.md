@@ -13,7 +13,7 @@
 
 ```bash
 pnpm install
-pnpm build   # 先 build：check 里的产物守卫读 dist/
+pnpm build
 pnpm check
 ```
 

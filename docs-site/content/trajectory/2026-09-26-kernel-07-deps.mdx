@@ -1,0 +1,21 @@
+---
+born-at: 2026-09-26T02:20
+type: choice
+parent: [2026-09-20-gwb-nas-suite-root]
+label: 内核 0.7 依赖
+domain: 依赖与发版
+---
+
+## 背景
+
+平台换了一代：内核包 0.7.2（词汇表包并进内核包、importmap 写死在内核包页面入口 `dist/index.html`），命令总线 0.5.2，外壳 0.14.1（`shell.env` 回执删了 `versions.launcher`），devkit 0.23 起发版前检查查 peer 里的插件与源上 latest 同线、查源码注入的提供方写在 peer 里、带界面的插件过样式检查，模板不再带产物测试与前缀测试。本仓三个插件还停在上一张卡 [内核 0.4 依赖](2026-09-24-kernel-04-deps.md) 的写法：peer 只写内核包 `^0.4.1`，其余 `@godcreator` 包在 dev，类型从词汇表包取，node 侧用 tsc 逐个文件输出。
+
+## 结论与边界
+
+supersedes:: [内核 0.4 依赖](2026-09-24-kernel-04-deps.md)
+
+三个插件照 devkit 0.23 的模板对齐：peer 写内核包 `^0.7.2` 与用到的插件（deepseek 写命令总线 `^0.5.2`、数据 `^0.1.9`、设置 `^0.3.5`、说明书 `^0.4.7` 且说明书标可选；nas-board、news-links 写命令总线 `^0.5.2`、外壳 `^0.14.1`），不另写 dev；`GwbContext` 从内核包 `import type`，浏览器侧的 `PaneArgs` / `PaneHandle` 从外壳的 `./pane` 子路径取；`build.ts` 用 esbuild 把 node 侧打成一个 `dist/index.js`，浏览器侧外置名单从内核包页面入口的 importmap 读；删掉 `tsconfig.build.json`、清单里的 `types` 出口、`gwb.title`、`prepublishOnly` 与 `keywords` 里的 `gwb`，三个包都写 `publishConfig.registry`。命令登记不再包 `ctx.effect`（命令总线自己随调用方注销），`gwbCommands` 不在时直接抛错而不是静默返回。
+
+五份模板测试副本（两个带界面插件的 `prefix.test.ts`、三个插件的 `artifact.test.ts`）删掉：它们查的包名 import、类名前缀、主题令牌由 devkit 的发版前检查与样式检查负责，副本不会跟着 devkit 更新；四份是模板原样，deepseek 那份只查 node 侧产物，换成 esbuild 单文件后已不适用。各插件的加载测试（`tests/plugin.test.ts`）与 deepseek 的纯逻辑测试留着。
+
+边界：没有 `shell.env`、`launcherVersion` 的读取方，外壳 0.14 的破坏性改动对本仓无代码影响；命令名、参数、回执、设置键都没动，版本号不在这次改，发版由主会话统一做。样式检查与注入检查在本机用 devkit 源码里的检查函数跑过，三个插件都通过；还没有在隔离 home 里装过。
