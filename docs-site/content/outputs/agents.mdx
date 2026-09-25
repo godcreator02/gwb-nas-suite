@@ -1,26 +1,24 @@
 ---
 title: AGENTS
-description: 仓根 AGENTS.md 的正本——render 摆过去，只写仓专属的
+description: 仓根 AGENTS.md 的正本——render 生成到仓根，只写仓专属的
 ---
 
 # gwb-nas-suite
 
 **本页回答**：在这个仓干活的 agent 先看什么、怎么跑、门禁是哪几条、什么碰不得。
 
-通用纪律（TDD、模块经接口连接、盘问、六区规则、文档怎么写）不在这儿——正本是随
-`@godcreator/gwb-docfirst-workflow` 插件发的 skill「docfirst-docs」，读它。这一页只写仓专属的，
-压在 60 行内。
-
 ## 先读
 
 `docs-site/content/docs/`：[系统地图](docs-site/content/docs/system-map.mdx) → 要改的那块的页 →
-[术语表](docs-site/content/docs/glossary.mdx)。在途的活在 `docs-site/content/spec/`（一件一页，验收清单在页头）。
+[术语表](docs-site/content/docs/glossary.mdx)。在途的活在 `docs-site/content/spec/`。
+写文档读 skill「docfirst-docs」，记轨迹卡读 skill「trajectory」，写插件、在隔离 home 里验证读 skill「gwb-devkit」，
+升版本号、发版读 skill「gwb-release」。
 
 ## 怎么跑
 
 ```bash
 pnpm install
-pnpm build   # 先 build：check 里的产物守卫吃 dist/
+pnpm build   # 先 build：check 里的产物守卫读 dist/
 pnpm check
 ```
 
@@ -35,9 +33,7 @@ cd docs-site && pnpm doc && pnpm build
 
 ## 红线
 
-- 件间不 import：news-links 用 deepseek 只走命令总线，绝不 `import '@godcreator/gwb-deepseek'`
-- deepseek 件是哑管道：不往里加重试 / 熔断 / 缓存 / 消费方策略，降级决策全在调用方
+- 插件之间不 import：news-links 用 deepseek 只走命令总线，绝不 `import '@godcreator/gwb-deepseek'`
+- deepseek 插件是哑管道：不往里加重试 / 熔断 / 缓存 / 消费方策略，降级决策全在调用方
 - NAS 侧的 compose 与脚本改动去 ugreen-nas-config（单元 26091409bfn）做，这个仓只有消费端
-- 改了代码要连着改现状页；改了 `content/outputs/` 下的 mdx 要 `pnpm doc:render` 重摆，生成物跟源一起提交
 - 这份 AGENTS.md 是生成物，正本是 `docs-site/content/outputs/agents.mdx`，改那边
-- 轨迹卡只增不改

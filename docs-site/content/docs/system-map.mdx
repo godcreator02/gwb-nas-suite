@@ -21,10 +21,10 @@ description: 拆成哪几块、各在哪、依赖方向是什么、先读哪块
 
 ## 依赖方向
 
-仓内的目标形态只有一条插件之间的依赖：news-links 经**命令总线**调 deepseek 的 `deepseek.chat`（不 import、不走网络直调）；nas-board 不依赖任何插件。这条依赖还没实现，代码里没有痕迹——设计写在 spec/news-links，实现之后回这页引用调用处。三个插件共同依赖的是平台提供的服务（命令总线、设置、数据、窗格），按 gwb-devkit 说明书里列出的服务使用。
+仓内的目标形态只有一条插件之间的依赖：news-links 经**命令总线**调 deepseek 的 `deepseek.chat`（不 import、不走网络直调）；nas-board 不依赖任何插件。这条依赖还没实现，代码里没有痕迹，设计写在 spec/news-links。三个插件依赖的是平台提供的服务：deepseek 用命令总线、设置、数据，news-links 与 nas-board 用命令总线与外壳（窗格）。
 
-`package.json` 里，三个插件的 `peerDependencies` 都只有内核包 `@godcreator/gwb-kernel-desktop`（范围是验证时那个内核的 `^x.y.z`）；用到的别的插件与词汇表包只取类型，写在 dev。news-links 与 nas-board 页面上的 react 由内核包经 importmap 提供，样式的主题令牌从外壳的 `theme.reference.css` 取。规矩的正本在 devkit 文档站「依赖怎么写」。
+三个插件的 `peerDependencies` 此刻都只写内核包 `@godcreator/gwb-kernel-desktop`，别的 `@godcreator` 包都在 `devDependencies`。news-links 与 nas-board 样式的主题令牌从外壳的 `theme.reference.css` 取。
 
 ## 每块一页
 
-每个插件在这一区都会有自己的页（固定块：管什么 / 不知道什么 / 数据结构 / 提供的接口 / 依赖的接口 / 怎么单独测 / 代码地图），随 spec 拆解归梁时建；news-links 与 nas-board 现在还是模板形状，没有可以引用的现状。
+deepseek 有自己的一页；news-links 与 nas-board 此刻还是模板形状，没有可以引用的现状，设计在交接区对应的页里。

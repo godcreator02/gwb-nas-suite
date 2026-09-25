@@ -7,8 +7,18 @@ description: NAS 监控与资讯消费的三个插件所在的仓——是什么
 
 **本页回答**：`gwb-nas-suite` 是什么、边界在哪、从哪一页开始读。
 
-这是 NAS 监控与资讯消费的 gwb 插件仓：只有一层 workspace 外壳，三个插件在 `plugins/`——`deepseek`（模型命令管道）、`nas-board`（NAS 体检看板）、`news-links`（资讯精选阅读器）。NAS 侧的数据生产与部署正本在 ugreen-nas-config（单元 26091409bfn），这个仓只有消费端；两边的契约是 NAS 每日归档的定案 JSON 与 FreshRSS / mail-archiver 的既有 API。
+## 是什么
 
-deepseek 已经实现（见 [deepseek 插件](/docs/deepseek)）；news-links 与 nas-board 还是 devkit 模板的形状，设计定案与验收清单在 [交接](/spec) 区对应的页里，做完一页就拆解归梁进这一区。为什么这么切、往哪儿去，见 [未来](/future/overview)。这一区只写**现状**：设计、原理、边界、接口——散文，不写历史，不写计划。
+这是 NAS 监控与资讯消费的 gwb 插件仓：仓根只是 workspace 根目录，三个插件在 `plugins/`——`deepseek`（模型命令管道）、`nas-board`（NAS 体检看板）、`news-links`（资讯精选阅读器）。NAS 侧的数据生产与部署在 ugreen-nas-config（单元 26091409bfn），这个仓只有消费端；两边的契约是 NAS 每日归档的定案 JSON 与 FreshRSS / mail-archiver 的既有 API。
 
-[系统地图](/docs/system-map) 是总索引，[术语表](/docs/glossary) 收这个仓里的词。写法判据见随 `@godcreator/gwb-docfirst-workflow` 插件发的 skill「docfirst-docs」，这儿只留一句：**一句话如果能被代码推翻，它就该带引用；一句话如果只是在复述代码，它就不该存在。**
+deepseek 已经实现；news-links 与 nas-board 还是 devkit 模板的形状，设计定案与验收清单在 [交接](/spec) 区对应的页里。往哪儿去见 [未来](/future/overview)。
+
+## 按来意怎么读
+
+| 来意 | 先读 |
+| --- | --- |
+| 看三个插件怎么分、谁依赖谁 | [系统地图](/docs/system-map) |
+| 要改 deepseek | [deepseek 插件](/docs/deepseek) |
+| 要做 news-links 或 nas-board | [交接](/spec) 区对应的页 |
+| 碰到不认识的词 | [术语表](/docs/glossary) |
+| 想知道为什么是现在这样 | [轨迹](/trajectory) |
