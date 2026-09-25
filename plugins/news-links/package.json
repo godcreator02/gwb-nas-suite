@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-news-links",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {"name": "godcreator"},
   "description": "资讯精选阅读器：目前是 devkit 模板形状，一个窗格与一条 ping 命令；要做成从 FreshRSS 与邮件增量里挑链接的阅读器，设计见文档站未来区的实施方案。",
   "type": "module",
