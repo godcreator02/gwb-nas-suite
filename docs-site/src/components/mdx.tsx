@@ -1,6 +1,6 @@
 /**
  * mdx 里能用的 React 组件表。表的类型由 registry.ts 的名单决定：少一个、多一个都编译不过；
- * 跟 docfirst.config.mjs 的机读规则表齐不齐，由 scripts/verify-roster.mjs 核对。
+ * 跟 docfirst.config.mjs 的机读规则表是否一致，由 scripts/verify-roster.mjs 核对。
  * 在 fumadocs 的默认表之上加本站组件，再把 pre 换成 docfirst 那个会画引用状态点的。
  */
 import defaultMdxComponents from 'fumadocs-ui/mdx'
