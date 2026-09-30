@@ -166,6 +166,7 @@ export function apply(ctx: GwbContext): void {
         '{ prompt 必给（非空字符串）, system?, jsonMode?（布尔；DeepSeek 要求 prompt 里出现 json 字样）, timeoutMs?（正数毫秒，缺省 60000，超过 110000 按 110000）, caller?（非空字符串，截到 64 字，缺省 adhoc）, model?（非空字符串，缺省取设置 model）}。' +
         '成功回 { ok: true, data: { text, usage: { promptTokens, completionTokens, totalTokens }, model, caller } }；' +
         '失败回 { ok: false, error: "timeout" | "rate_limit" | "bad_key" | "bad_response" | "bad_args"（参数不合法）, detail }',
+      effect: 'external',
       plugin: PACKAGE_NAME,
     },
     chatHandler(settings, data, log),
@@ -178,6 +179,7 @@ export function apply(ctx: GwbContext): void {
       usage:
         '{ days?（正整数，缺省 30，上限 3650；不是正整数按 30）}，不给参数也行。' +
         '回 { ok: true, data: { days, byCaller: [{ caller, calls, ok, failed, totalTokens }]（按 totalTokens 降序）, total: { caller: "全部", calls, ok, failed, totalTokens } } }',
+      effect: 'read',
       plugin: PACKAGE_NAME,
     },
     usageHandler(data),

@@ -28,6 +28,7 @@ export function apply(ctx: GwbContext): void {
       name: 'news-links.ping',
       description: '模板自带的命令：返回插件名与当前时间，用来确认插件已加载',
       usage: '无参数。返回 { plugin, time }：插件名与 ISO 时刻',
+      effect: 'read',
       plugin: '@godcreator/gwb-news-links',
     },
     async () => ({ ok: true, data: { plugin: name, time: new Date().toISOString() } }),
