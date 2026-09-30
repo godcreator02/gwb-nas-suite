@@ -9,9 +9,9 @@ description: 资讯精选阅读器。此刻还是 devkit 模板的形状（一�
 
 `@godcreator/gwb-news-links` 还是 devkit 建仓模板的形状：一个标题为「资讯精选阅读器」的窗格，里面是模板自带的计数按钮；一条 `news-links.ping`，回插件名与当前时刻，只用来确认插件加载上了。要做成的阅读器——从 FreshRSS 与 mail-archiver 取增量、按水位去重、经 `deepseek.chat` 精选、在窗格里列出链接——设计与验收清单在 [news-links 的实施方案](/future/spec/news-links)。
 
-{/* has file="../plugins/news-links/src/index.ts" text="name: 'news-links.ping'" */}
+{/* ref file="../plugins/news-links/src/index.ts" lines="28-28" hash="2e8ea7d60f2b" blob="e0f4ae76918a" */}
 
-{/* has file="../plugins/news-links/src/index.ts" text="shell.registerPane({ id: 'main', title: '资讯精选阅读器'" */}
+{/* ref file="../plugins/news-links/src/index.ts" lines="24-24" hash="caad83713f68" blob="e0f4ae76918a" */}
 
 这一版只有 node 侧加载、浏览器侧窗格这一条最小的链路，和 deepseek、外部服务都还没有接缝，所以没有画接缝图。
 

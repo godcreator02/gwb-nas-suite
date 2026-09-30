@@ -1,0 +1,27 @@
+---
+born-at: 2026-09-30T12:00
+type: choice
+parent: [2026-09-20-gwb-nas-suite-root]
+label: 升 docfirst 0.5
+domain: 文档站
+---
+
+## 背景
+
+文档站装的是 `@godcreator/docfirst-workflow` 0.3.1 加 `@godcreator/docfirst-trajectory` 0.1.1。docfirst 0.5 起 fumadocs 适配并进
+`docfirst-workflow` 的子入口 `./fumadocs`，`docfirst-trajectory` 停更；配置删掉 `formats`；`has` 记号直接报错。0.5.2 的 `docfirst check`
+在本站第一处 `has` 记号上就中止了。
+
+## 结论与边界
+
+**站升到 `@godcreator/docfirst-workflow` 0.5.2（精确号），删掉 `@godcreator/docfirst-trajectory`。集合仍写在 `source.config.ts`，
+fumadocs、next 的版本不动，没有换成建站模板的 `fumadocs-mdx/macro` 写法**：那一步要连带升 fumadocs、next、typescript 并改一批官方脚手架文件，
+和这次要解决的 docfirst 破坏性改动无关。gwb-paper-fetch 升 0.5.0 时走的也是这条路。
+
+照模板改的只有接线：`cardSchema` / `remarkTrajectoryLinks` 改从 `./fumadocs` 取，名册换成 `fumadocsRoster`；带侧栏的布局从根布局挪进
+`src/app/docs/layout.tsx`，未来区与轨迹卡页复用它；加整页星轨盘 `/trajectory`，轨迹区原来的导读页 `index.mdx` 删掉，侧栏第一条链到盘。
+
+13 处 `has` 记号改成钉 `text` 所在那一行的行段记号，没有一处命中多行。三张非根卡的 `parent` 本来就只写根卡，关系行的 `.md` 链接
+`docfirst trajectory --json` 不报病，卡没有改。
+
+依据：本卡与升级改动在同一个提交里；迁移前后的检查结果是提交前后在 `docs-site` 里运行 `pnpm doc` 的输出，没有另存。

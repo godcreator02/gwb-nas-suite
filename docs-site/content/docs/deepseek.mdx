@@ -17,9 +17,9 @@ description: 整个工作台共用的 DeepSeek 调用入口：deepseek.chat 原�
 
 加载时登记 `deepseek.chat` 与 `deepseek.usage`，参数形状与回执写在各自的 `usage` 里（agent 经 `search` 看到的就是它）；语义的正本是随包说明书 [deepseek](/docs/outputs/skills/deepseek)。调用时总线把参数原样交给处理函数：参数先经 `parseChatArgs` 收窄，不合法回 `bad_args`，不发请求、不记账。按名字转发、核对登记方包名、卸载时注销都是命令总线的事，本插件不包 `ctx.effect`。
 
-{/* has file="../plugins/deepseek/src/index.ts" text="name: 'deepseek.chat'" */}
+{/* ref file="../plugins/deepseek/src/index.ts" lines="162-162" hash="787782571bfb" blob="69592ed370b4" */}
 
-{/* has file="../plugins/deepseek/src/index.ts" text="name: 'deepseek.usage'" */}
+{/* ref file="../plugins/deepseek/src/index.ts" lines="177-177" hash="24e2ff6895d4" blob="69592ed370b4" */}
 
 改了命令名、参数或回执形状，出问题的是调用方，这类改动按破坏性版本处理。
 
@@ -59,7 +59,7 @@ description: 整个工作台共用的 DeepSeek 调用入口：deepseek.chat 原�
 
 说明书只在局部注入里登记：说明书插件没装，两条命令照常可用，只是 agent 读不到说明书 `deepseek`。
 
-{/* has file="../plugins/deepseek/src/index.ts" text="ctx.inject(['gwbSkills'], (c) => {" */}
+{/* ref file="../plugins/deepseek/src/index.ts" lines="154-154" hash="322e1eafbdfe" blob="69592ed370b4" */}
 
 ## 对外能做什么
 

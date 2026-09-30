@@ -9,9 +9,9 @@ description: NAS 体检看板。此刻还是 devkit 模板的形状（一个窗�
 
 `@godcreator/gwb-nas-board` 还是 devkit 建仓模板的形状：一个标题为「NAS 体检看板」的窗格，里面是模板自带的计数按钮；一条 `nas-board.ping`，回插件名与当前时刻，只用来确认插件加载上了。要做成的看板——经 SMB 只读拉 NAS 每天归档的定案 JSON、画今日结论与近 30 天可用性、新鲜度看门狗、一键复制询问——设计与验收清单在 [nas-board 的实施方案](/future/spec/nas-board)。
 
-{/* has file="../plugins/nas-board/src/index.ts" text="name: 'nas-board.ping'" */}
+{/* ref file="../plugins/nas-board/src/index.ts" lines="28-28" hash="172f33d91156" blob="f8cc3fec0553" */}
 
-{/* has file="../plugins/nas-board/src/index.ts" text="shell.registerPane({ id: 'main', title: 'NAS 体检看板'" */}
+{/* ref file="../plugins/nas-board/src/index.ts" lines="24-24" hash="77811265dc50" blob="f8cc3fec0553" */}
 
 这一版只有 node 侧加载、浏览器侧窗格这一条最小的链路，和别的插件、磁盘、外部服务都还没有接缝，所以没有画接缝图。
 

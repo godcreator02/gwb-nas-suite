@@ -27,11 +27,11 @@ description: 三个插件各提供什么、注入了哪些服务、peer 怎么�
 | `gwbData` | `@godcreator/gwb-data` | 必需 | `^0.1.9` | 读写记账文档 `journal` | 插件不加载 |
 | `gwbSkills` | `@godcreator/gwb-skills` | 局部注入 | `^0.4.7`，`optional: true` | 登记说明书 `deepseek` | 命令照常可用，agent 读不到说明书 |
 
-{/* has file="../plugins/deepseek/src/index.ts" text="export const inject = ['gwbCommands', 'gwbSettings', 'gwbData']" */}
+{/* ref file="../plugins/deepseek/src/index.ts" lines="27-27" hash="078897cb07e9" blob="69592ed370b4" */}
 
-{/* has file="../plugins/deepseek/src/index.ts" text="ctx.inject(['gwbSkills']" */}
+{/* ref file="../plugins/deepseek/src/index.ts" lines="154-154" hash="322e1eafbdfe" blob="69592ed370b4" */}
 
-{/* has file="../plugins/deepseek/package.json" text="&quot;@godcreator/gwb-skills&quot;: { &quot;optional&quot;: true }" */}
+{/* ref file="../plugins/deepseek/package.json" lines="29-29" hash="3a8da27b1f5c" blob="c9aa1086677f" */}
 
 ### 按名字调用与约定通道
 
@@ -40,7 +40,7 @@ description: 三个插件各提供什么、注入了哪些服务、peer 怎么�
 | 网络 | DeepSeek 开放平台 | `POST {base-url}/chat/completions` | 真正的模型调用 |
 | 数据插件的文档 | 数据插件 | `journal`（磁盘上是 `journal.json`） | 记账 |
 
-{/* has file="../plugins/deepseek/src/index.ts" text="const JOURNAL_DOC_NAME = 'journal'" */}
+{/* ref file="../plugins/deepseek/src/index.ts" lines="35-35" hash="3eb150ae0633" blob="69592ed370b4" */}
 
 ## @godcreator/gwb-nas-board
 
@@ -58,7 +58,7 @@ description: 三个插件各提供什么、注入了哪些服务、peer 怎么�
 | `gwbCommands` | `@godcreator/gwb-commands` | 必需 | `^0.5.6` | 登记 `nas-board.ping` | 插件不加载 |
 | `gwbShell` | `@godcreator/gwb-shell` | 必需 | `^0.15.1` | 注册窗格；样式取外壳的主题令牌 | 插件不加载 |
 
-{/* has file="../plugins/nas-board/src/index.ts" text="export const inject = ['gwbCommands', 'gwbShell']" */}
+{/* ref file="../plugins/nas-board/src/index.ts" lines="13-13" hash="1c146f7f0e9c" blob="f8cc3fec0553" */}
 
 ### 按名字调用与约定通道
 
@@ -80,7 +80,7 @@ description: 三个插件各提供什么、注入了哪些服务、peer 怎么�
 | `gwbCommands` | `@godcreator/gwb-commands` | 必需 | `^0.5.6` | 登记 `news-links.ping` | 插件不加载 |
 | `gwbShell` | `@godcreator/gwb-shell` | 必需 | `^0.15.1` | 注册窗格；样式取外壳的主题令牌 | 插件不加载 |
 
-{/* has file="../plugins/news-links/src/index.ts" text="export const inject = ['gwbCommands', 'gwbShell']" */}
+{/* ref file="../plugins/news-links/src/index.ts" lines="13-13" hash="1c146f7f0e9c" blob="e0f4ae76918a" */}
 
 ### 按名字调用与约定通道
 
