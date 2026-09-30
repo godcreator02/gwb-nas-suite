@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-news-links",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": {"name": "godcreator"},
   "description": "资讯精选阅读器：目前是 devkit 模板形状，一个窗格与一条 ping 命令；要做成从 FreshRSS 与邮件增量里挑链接的阅读器，设计见文档站未来区的实施方案。",
   "type": "module",
@@ -19,7 +19,7 @@
   },
   "peerDependencies": {
     "@godcreator/gwb-kernel-desktop": "^0.10.0",
-    "@godcreator/gwb-commands": "^0.5.6",
+    "@godcreator/gwb-commands": "^0.6.0",
     "@godcreator/gwb-shell": "^0.15.1"
   },
   "devDependencies": {
