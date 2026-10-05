@@ -23,7 +23,7 @@ description: 三个插件各提供什么、注入了哪些服务、peer 怎么�
 | 服务 | 提供方包 | 必需 / 局部注入 | peer 写法 | 用来做什么 | 缺了会怎样 |
 | --- | --- | --- | --- | --- | --- |
 | `gwbCommands` | `@godcreator/gwb-commands` | 必需 | `^0.5.6` | 登记两条命令 | 插件不加载 |
-| `gwbSettings` | `@godcreator/gwb-settings` | 必需 | `^0.3.5` | 定义并读三项设置 | 插件不加载 |
+| `gwbSettings` | `@godcreator/gwb-settings` | 必需 | `^0.4.0` | 定义并读三项设置 | 插件不加载 |
 | `gwbData` | `@godcreator/gwb-data` | 必需 | `^0.1.9` | 读写记账文档 `journal` | 插件不加载 |
 | `gwbSkills` | `@godcreator/gwb-skills` | 局部注入 | `^0.4.7`，`optional: true` | 登记说明书 `deepseek` | 命令照常可用，agent 读不到说明书 |
 

@@ -1,6 +1,6 @@
 {
   "name": "@godcreator/gwb-deepseek",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "author": {"name": "godcreator"},
   "description": "DeepSeek 命令插件：deepseek.chat 把模型调用原样发给 DeepSeek 并原样带回结果，deepseek.usage 按调用方汇总 token 用量；key、模型与 API 地址存在设置里。",
   "type": "module",
@@ -22,7 +22,7 @@
     "@godcreator/gwb-kernel-desktop": "^0.10.0",
     "@godcreator/gwb-commands": "^0.6.0",
     "@godcreator/gwb-data": "^0.1.9",
-    "@godcreator/gwb-settings": "^0.3.5",
+    "@godcreator/gwb-settings": "^0.4.0",
     "@godcreator/gwb-skills": "^0.4.7"
   },
   "peerDependenciesMeta": {

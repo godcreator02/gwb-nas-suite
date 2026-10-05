@@ -38,7 +38,7 @@ description: 要在这个工作台里调 DeepSeek 时读——deepseek.chat 的�
 ## 设置
 
 `api-key`（secret，必填）、`model`（缺省 `deepseek-chat`）、`base-url`（缺省 `https://api.deepseek.com`）。
-key 不随包发布、不进日志；换 key 只改设置，不用动插件。
+key 不随包发布、不进日志；换 key 不用动插件。查是否已配置用 `credentials.status { "section": "deepseek", "key": "api-key" }`；授权后的复制、文件导入分别用 `credentials.copy` / `credentials.import`，完整参数读说明书 `gwb-settings`，目标是 `deepseek.api-key`。本地设置界面也可输入，agent 只核对状态、不回显原文；随机生成值不能代替 DeepSeek 签发的 key。
 
 ## 调用方要知道的
 
