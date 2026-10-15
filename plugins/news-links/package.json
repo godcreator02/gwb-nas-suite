@@ -9,6 +9,7 @@
   },
   "files": ["dist"],
   "keywords": ["gwb-plugin"],
+  "repository": { "type": "git", "url": "https://github.com/godcreator02/gwb-nas-suite.git" },
   "publishConfig": { "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/" },
   "scripts": {
     "build": "node build.ts && tailwindcss -i src/client/styles.css -o dist/style.css",

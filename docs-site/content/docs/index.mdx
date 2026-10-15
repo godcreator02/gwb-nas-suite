@@ -17,7 +17,7 @@ description: NAS 监控与资讯消费的三个 gwb 插件所在的仓——各�
 
 仓根是不发布的 pnpm workspace，一个插件一个包，配置都在包内：`build.ts` 用 esbuild 打 node 侧与浏览器侧，Tailwind 出样式（deepseek 没有窗格，只有 node 侧）。文档站 `docs-site/` 自己一套依赖，不在 workspace 里。
 
-{/* tree dir="../plugins" depth="2" hash="17eb99e57064" */}
+{/* tree dir="../plugins" depth="2" hash="fe38ac48bee1" */}
 
 三个插件之间此刻没有调用关系；以后唯一的一条是 news-links 经命令总线按名字调 `deepseek.chat`，不 import、不写 peer。各插件注入了哪些服务、peer 怎么写，见[插件之间怎么连](/docs/wiring)。
 

@@ -1,15 +1,17 @@
 {
   "name": "@godcreator/gwb-deepseek",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "author": {"name": "godcreator"},
+  "license": "MIT",
   "description": "DeepSeek 命令插件：deepseek.chat 把模型调用原样发给 DeepSeek 并原样带回结果，deepseek.usage 按调用方汇总 token 用量；key、模型与 API 地址存在设置里。",
   "type": "module",
   "exports": {
     ".": "./dist/index.js"
   },
-  "files": ["dist", "skills"],
+  "files": ["dist", "skills", "LICENSE"],
   "keywords": ["gwb-plugin"],
-  "publishConfig": { "registry": "https://git.tianshen02.online:28377/api/packages/godcreator/npm/" },
+  "repository": { "type": "git", "url": "https://github.com/godcreator02/gwb-nas-suite.git" },
+  "publishConfig": { "registry": "https://registry.npmjs.org/", "access": "public" },
   "scripts": {
     "build": "node build.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
