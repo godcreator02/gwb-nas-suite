@@ -26,5 +26,5 @@ news-links 与 nas-board 要有命令总线与外壳；缺的在 `plugin-manager
 
 ## 文档
 
-`docs-site/` 是文档站：`cd docs-site && pnpm install && pnpm build && pnpm start`，看 `http://127.0.0.1:4327`（不用 dev 模式，改了内容重新 build）。
+`docs-site/` 是文档站（god-docsite + docfirst），由 gwb 工作台托管开发服务：`docsite.site.add {"dir":"<站目录>"}`，地址看 `docsite.site.list`。
 这份 README 是生成物，正本是 `docs-site/content/docs/outputs/readme.mdx`。

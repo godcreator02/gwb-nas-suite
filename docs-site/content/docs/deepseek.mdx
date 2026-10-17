@@ -3,6 +3,8 @@ title: deepseek 插件
 description: 整个工作台共用的 DeepSeek 调用入口：deepseek.chat 原样转发、按四类错误回执，每次调用记一笔账，deepseek.usage 按调用方汇总；key 只存在这个插件的设置里
 ---
 
+import { DeepseekSeams } from './deepseek/deepseek-seams'
+
 **本页回答**：deepseek 插件对外能做什么、和哪几个插件与外部服务相接、每条接缝传什么、谁负责什么、不做什么。
 
 工作台里任何地方要用模型——agent 经 MCP 入口调，别的插件（以后的 news-links）经命令总线调——都走同一条命令 `deepseek.chat`，用同一份 API key。插件把请求原样发给 DeepSeek、把结果原样带回，失败归成四类结构化错误，**不重试、不熔断、不缓存**：要不要再调、怎么降级由调用方决定。这条边界是有意的：第二个调用方不该被第一个调用方需要的策略限制住。每次真正发出去的调用都记一笔账（时刻、调用方、模型、成败、token 数），`deepseek.usage` 按调用方汇总。插件只有 node 侧，没有窗格。

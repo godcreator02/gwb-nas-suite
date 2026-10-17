@@ -1,0 +1,38 @@
+---
+born-at: 2026-10-17T10:45
+type: choice
+parent: [2026-09-20-gwb-nas-suite-root]
+label: 文档站迁到 god-docsite
+domain: 文档站
+---
+
+## 背景
+
+docs-site 原来是 Next 16 + `@godcreator/docfirst-workflow` 0.5.2：页面路由、搜索、星轨盘都是站里手写的 Next 文件（`src/app/`），
+组件名册由 `src/components/registry.ts` 与 `scripts/verify-roster.mjs` 两边核对，看页面要先 `pnpm build` 再 `pnpm start`（端口 4327）。
+平台换成了 `@godcreator/god-docsite`（fumadocs + React Router + Vite）加功能包 code-pin、trajectory、explainer，命令行换成 `@godcreator/docfirst` 0.1.0，
+开发服务由工作台的 `docsite.site.*` 托管。这次照 god-docsite 文档站的维护页「Next docfirst 站迁到平台」迁过来，先例是 gwb-vscode 的 d08127a。
+
+## 结论与边界
+
+- 骨架用 `docfirst.create` 在 `D:\gwb-docfirst-migrate\gwb-nas-suite\docs-site` 生成，`app/` 与根配置、身份文件 `docsite.json`、`people.json`、`glossary.json`、`comments/`
+  整份换进 docs-site；`package.json` 的依赖与脚本照骨架，名字、版本、描述保留。首页 `app/routes/home.tsx` 写了一句介绍
+- 轨迹卡从 `content/trajectory/` 挪到站点根 `trajectory/`，给星轨盘入口排侧栏的 `meta.json` 删掉；`content/meta.json` 写站名，现状、未来两区的 `meta.json` 加 `title` 与 `root`
+- 接缝图 `DeepseekSeams` 从 `src/components/` 挪进 deepseek 页的同名文件夹 `content/docs/deepseek/`，页面开头 import 它；
+  它用的颜色变量原来写在全站的 `src/app/global.css`，挪进组件自己 import 的 `deepseek-seams.css`。组件没有数据文件，机读规则仍是配置里的一句话
+- `docfirst.config.mjs` 改成 `fumadocsRoster: true`、`trajectory: 'trajectory'`、名册加 `Term`；四个生成物的映射照旧
+- 生成物只有 README 变了：正本里「build + start、端口 4327」改成由工作台托管开发服务。AGENTS、CLAUDE、deepseek 的 SKILL.md 新渲染器写出来与旧的逐字相同，
+  原文的列表本来就用 `-`、表格没有空格子，网址都在反引号里
+- 未来区 inbox 里那条「docfirst-workflow 0.5.3 起 Markdown 图片不用登记」的反馈删掉：它要做的是升 docfirst-workflow，站已经不用这个包，新的 docfirst 本来就不要求登记 Markdown 图片
+- 迁完 `pnpm doc` 全绿，`pnpm typecheck`、`pnpm build` 通过，`docsite.site.start` 后首页、`/docs`、`/future/overview`、`/docs/deepseek`（接缝图画出来了）、卡页、`/llms.txt` 都是 200
+
+边界：未来区没有 index 页，`/future` 本身是 404，侧栏下拉框的「未来」去 `/future/overview`；站内没有链到 `/future` 的地方。
+
+## 否掉的候选
+
+在 Next 站上逐个文件改成 React Router：路由、页面 loader、功能包接线全都不同，从骨架换进来再核对差异更可靠，gwb-vscode 也是这么迁的。
+
+## 代价与遗留
+
+`glossary.mdx` 仍是一张手写表格页，五个术语没有转进 `glossary.json`，正文里也就没有术语标注；要不要转、转了表格页留不留，以后再定。
+AGENTS 正本仍写「别的仓写来的反馈在 `docs-site/content/future/inbox/`」，删掉那条反馈后这个目录暂时是空的。

@@ -1,0 +1,15 @@
+/* 接缝图：选中的接缝与两端、磁盘读写线、模块虚线框，深浅主题各一套 */
+:root {
+  --seam-hot: hsl(262, 70%, 52%);
+  --seam-hot-soft: hsla(262, 70%, 52%, 0.12);
+  --seam-disk: hsl(28, 85%, 45%);
+  --seam-line: hsl(220, 10%, 55%);
+  --seam-frame: hsl(220, 10%, 62%);
+}
+.dark {
+  --seam-hot: hsl(262, 85%, 74%);
+  --seam-hot-soft: hsla(262, 85%, 74%, 0.16);
+  --seam-disk: hsl(32, 90%, 62%);
+  --seam-line: hsl(220, 10%, 58%);
+  --seam-frame: hsl(220, 10%, 45%);
+}
